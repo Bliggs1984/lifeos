@@ -15,7 +15,8 @@
 <table><tr><th>Route</th><th>Setup</th><th>What you get</th></tr>
 <tr><td><b>Claude Code</b></td><td>Install it, open a terminal in this folder, type <code>claude</code>.</td><td>The four rituals are already installed as slash commands under <code>.claude/skills/</code>. Type <code>/checkin</code>.</td></tr>
 <tr><td><b>Another coding agent</b> (Codex, Cursor, Copilot, Aider, and so on)</td><td>Open the folder. Most of them read <code>AGENTS.md</code> automatically.</td><td>Say "run the daily check-in as described in CLAUDE.md". The ritual steps are in the skill files; the agent can read them.</td></tr>
-<tr><td><b>A chat model with no file access</b></td><td>Paste <code>CLAUDE.md</code> and <code>data/inbox.json</code> into the chat.</td><td>Proposals only. You apply them in the app. Slower, still useful.</td></tr></table>
+<tr><td><b>A local model</b> (Ollama, LM Studio, llama.cpp) <b>or any API key</b></td><td>Run <code>python scripts/propose.py checkin</code>. Flags or environment variables pick the server and model.</td><td>Proposals as Markdown with ready-to-paste JSON. Nothing is written for you, so a small model is safe here. For a local model that writes files too, point Aider or OpenCode at the folder.</td></tr>
+<tr><td><b>A chat model with no file access</b></td><td>Paste <code>CLAUDE.md</code> and <code>data/inbox.json</code> into the chat, or paste the output of <code>propose.py checkin --dry-run</code>.</td><td>Proposals only. You apply them in the app. Slower, still useful.</td></tr></table>
 <div class="why"><span>the contract</span>Whatever you use, the rules are the same and they live in <code>CLAUDE.md</code>: preserve the JSON schemas, two-space indent, never backfill habits, never nag. Read <code>docs/AI-INTEGRATION.md</code> if you want the full picture, including a local model on your own machine.</div>
 
 <h2><span class="n">02</span>Run it</h2>

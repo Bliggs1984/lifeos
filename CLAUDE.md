@@ -22,7 +22,9 @@ The system was built for someone with ADHD and works for anyone who ignores thin
 ```
 lifeos/
 ├── CLAUDE.md          # this file: system rules, schemas, ritual summaries
-├── AGENTS.md          # pointer here for assistants that read AGENTS.md
+├── AGENTS.md          # pointer here for Codex, Cursor, OpenCode, Zed and friends
+├── GEMINI.md          # pointer here for Gemini CLI
+├── .github/copilot-instructions.md   # pointer here for GitHub Copilot
 ├── lifeos.html        # the app (single file, no build)
 ├── data/
 │   ├── inbox.json     # raw captures, unprocessed
@@ -38,7 +40,8 @@ lifeos/
 ├── templates/         # reusable checklists the assistant pre-fills
 ├── scripts/
 │   ├── morning_open.py   # scheduled: opens lifeos.html at the hour you sit down
-│   └── checkin_status.py # optional SessionStart hook: one-line status + ritual nudge
+│   ├── checkin_status.py # optional SessionStart hook: one-line status + ritual nudge
+│   └── propose.py        # any ritual, any OpenAI-compatible model, propose-only
 ├── docs/              # DESIGN.md (the why), AI-INTEGRATION.md (the how)
 └── .claude/skills/    # checkin, curate, weekly-review, portfolio
 ```
@@ -133,9 +136,11 @@ Under the deck: any overdue task as a change-it prompt, then capture, inbox, foc
 - **`/weekly-review`**: weekly, 15-30 min. Shipped list first (wins before problems, always), carried tasks, stale sweep, goal pulse, unstick patterns, next week's focus 3.
 - **`/portfolio`**: quarterly, 20-30 min. Adapted from Rainer Strack's *Strategize Your Life*. Rate 15-16 life units on hours / importance / satisfaction against the user's own one-line definition of a great life (collected first, every time), rank by gap, split high-gap units into grinding vs starved, turn the corner into goals, append a snapshot.
 
-## Local models
+## Other models and local models
 
-A local model (Ollama or similar) is a good fit for bulk language work: drafting `bite` lines for overdue tasks, first-pass inbox classification, summarising the week's ledger. It is **propose-only**: it never writes to `data/*.json` directly. The writer is always the user or an assistant running a ritual with them.
+Nothing in this folder is tied to one provider. `AGENTS.md`, `GEMINI.md` and `.github/copilot-instructions.md` point other coding agents here; the skill files are plain Markdown any tool can follow. `docs/AI-INTEGRATION.md` has setup for each route.
+
+`scripts/propose.py` runs any ritual against any OpenAI-compatible endpoint (Ollama, LM Studio, llama.cpp, OpenAI, Gemini, Anthropic, Mistral, OpenRouter) in **propose-only** mode: it reads `data/` and prints Markdown proposals with ready-to-paste JSON. It never writes to `data/*.json`. That is the safe way to put a small local model on the daily check-in: it cannot corrupt a file it never writes. The writer is always the user, or an agent running a ritual with them.
 
 ## Deliberately not built
 

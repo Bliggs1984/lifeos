@@ -13,3 +13,7 @@ desktop.ini
 # editors
 .vscode/
 .idea/
+
+# python
+__pycache__/
+proposals/

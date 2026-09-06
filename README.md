@@ -16,7 +16,7 @@ One HTML file, a folder of JSON, and an AI assistant that does the weekly thinki
 
 **Unstick.** Stuck on a task? Pick what is in the way (Stuck, Overwhelmed, Unmotivated, Disorganized, Discouraged), get one concrete research-backed intervention and a timer, say whether it worked. Every attempt is logged so patterns surface at the weekly review.
 
-**The rituals.** An AI assistant working in the folder runs four of them: a daily check-in (5-10 min), a weekly curation that restocks the learning deck with lessons built from verified sources (10 min), a weekly review that leads with what you shipped (15-30 min), and a quarterly life portfolio (20-30 min). Ready to go as Claude Code slash commands; portable to any assistant that can read Markdown and edit JSON.
+**The rituals.** An AI model working in the folder runs four of them: a daily check-in (5-10 min), a weekly curation that restocks the learning deck with lessons built from verified sources (10 min), a weekly review that leads with what you shipped (15-30 min), and a quarterly life portfolio (20-30 min). Ready to go as Claude Code slash commands; portable to any coding agent that reads Markdown and edits JSON; runnable propose-only against a local Ollama or any API through one dependency-free script.
 
 ## Quick start
 
@@ -24,7 +24,13 @@ One HTML file, a folder of JSON, and an AI assistant that does the weekly thinki
 2. Open `lifeos.html` in Chrome or Edge. (It uses the File System Access API; Firefox and Safari don't have it.)
 3. Click **Choose LifeOS folder** and pick the folder you cloned into. Chrome asks once; choose *Allow on every visit* and you won't see the screen again.
 4. The first learning card is already dealt. It teaches the system in fifteen minutes. Capture three things while you're there.
-5. Optional but recommended: open the folder in [Claude Code](https://claude.com/claude-code) and type `/checkin`. Card 2 walks through it. Other assistants: see `docs/AI-INTEGRATION.md`.
+5. Optional but recommended: give it an AI. Any of these works, and card 2 walks through it:
+   - **Claude Code**: open the folder, type `/checkin`. Zero setup.
+   - **Any other coding agent** (Codex, Gemini CLI, Cursor, Copilot, Aider, Cline, OpenCode, and so on): open the folder; it reads `AGENTS.md`. Ask for "the check-in in `.claude/skills/checkin/SKILL.md`".
+   - **A local model** (Ollama, LM Studio, llama.cpp) or **any API key**: `python scripts/propose.py checkin`. Proposals only, nothing leaves your machine with a local server.
+   - **A web chat**: paste `CLAUDE.md` and your `data/inbox.json`.
+
+   Details for each in `docs/AI-INTEGRATION.md`.
 
 ### Open it every morning
 
@@ -49,10 +55,10 @@ lifeos.html        the app, single file, no build step
 data/              your data, plain JSON, yours
 learning/          the learning workspace: mission, sources, notes, lessons
 reviews/           dated check-in and weekly review logs
-scripts/           morning opener and an optional status hook
-.claude/skills/    the four rituals, as Claude Code skills
-CLAUDE.md          the contract every assistant follows: schemas and rules
-AGENTS.md          pointer to the above for tools that read AGENTS.md
+scripts/           morning opener, optional status hook, propose.py for any model
+.claude/skills/    the four rituals, as Claude Code skills (plain Markdown, any tool can follow them)
+CLAUDE.md          the contract every model follows: schemas and rules
+AGENTS.md, GEMINI.md, .github/copilot-instructions.md   pointers to the above for other agents
 docs/              DESIGN.md (why it's like this), AI-INTEGRATION.md (how to wire an assistant)
 ```
 
