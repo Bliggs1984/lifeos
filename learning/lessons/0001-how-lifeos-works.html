@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How LifeOS works — LifeOS learning</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/lesson.css"></head>
+<body><div class="page">
+<div class="eyebrow">Getting started · card 1 of 3 · 15 min</div>
+<h1>How this system works, in fifteen minutes</h1>
+<div class="payoff"><b>Payoff:</b> after this you know the four things the app does, the one thing it deliberately refuses to do, and where your assistant fits. You will also have three real items in your inbox, which is the whole system running.</div>
+
+<div id="t"></div>
+
+<h2><span class="n">01</span>The shape of the screen</h2>
+<p>Top to bottom, the app is ordered by what matters at 7 a.m.:</p>
+<table><tr><th>Block</th><th>What it is for</th><th>Who feeds it</th></tr>
+<tr><td><b>The deck</b></td><td>Two cards. Today's learning card and today's one move. Both fit in a glance.</td><td>Curation restocks the learning queue. The move comes from a starred task or from <code>data/today.json</code>.</td></tr>
+<tr><td><b>Overdue prompt</b></td><td>Appears only when a task is past due. Offers to change the task, never to nag about it.</td><td>You, with three buttons.</td></tr>
+<tr><td><b>Capture</b></td><td>One line, Enter, gone. No categories, no decisions.</td><td>You, any time.</td></tr>
+<tr><td><b>Inbox, focus, tasks, habits, goals</b></td><td>The ordinary machinery. Focus is capped at three. Habits at five.</td><td>You in the app, your assistant at check-in.</td></tr></table>
+
+<h2><span class="n">02</span>The one thing it refuses to do</h2>
+<div class="step"><div class="lab">the rule</div><b>Nothing pushes. No toast, no email, no red badge, no streak-shaming.</b> The tab being open in the morning is the whole mechanism.</div>
+<p>The original owner of this system had a morning brief emailed to him for nineteen days straight and read it zero times. Anything that can be blocked out will be blocked out. So the app gives you something worth looking at and then stays quiet.</p>
+<div class="why"><span>why it matters</span>If you have ADHD, or just a full life, a system that guilts you about gaps is a system you will abandon. Here missed days cost nothing. Streaks start a new run. A check-in after a fortnight away is a normal check-in.</div>
+
+<h2><span class="n">03</span>The overdue mechanic</h2>
+<p>A task that is past due leaves the list and appears once, near the top, with three moves:</p>
+<div class="step"><div class="lab">take the 10-min version</div>Only offered when the task has a <code>bite</code>: a real ten-minute first move that your assistant wrote at curation. The task's title becomes the bite and the due date clears.</div>
+<div class="step"><div class="lab">rescope</div>Flags the task so the next curation rewrites it. You are saying "this matters but it is the wrong shape".</div>
+<div class="step"><div class="lab">let it go</div>Moves it to Someday. Someday is a parking lot, not a graveyard, and it never nags.</div>
+<p>The reasoning: if something went overdue, you had already decided it was not important enough. Showing it again in red trains you to ignore the screen. The only useful response is to change the task until its importance is felt.</p>
+
+<h2><span class="n">04</span>The learning deck</h2>
+<p>Learning is organised in <b>tracks</b>. Each track has an <b>artifact</b>: a tangible thing that exists when the track is finished, such as a working script, a one-page document, a set-up machine. The dots under the card count sessions toward it.</p>
+<p>Each morning the app deals the first queued card. Three buttons:</p>
+<table><tr><th>Button</th><th>What happens</th></tr>
+<tr><td><b>Done</b></td><td>Asks for one takeaway line, appends it to the ledger, ticks a habit whose name contains "learn" if you have one.</td></tr>
+<tr><td><b>Swap</b></td><td>Deals the next card. The card you skipped goes to the back and its swap count goes up. Two swaps means it was scoped wrong; curation shrinks it.</td></tr>
+<tr><td><b>Not today</b></td><td>Card hides until tomorrow. No consequence.</td></tr></table>
+
+<h2><span class="n">05</span>Where the assistant fits</h2>
+<p>The app is the glanceable surface. An AI assistant working in this folder is the review engine. It runs four rituals, described in <code>CLAUDE.md</code>:</p>
+<table><tr><th>Ritual</th><th>Cadence</th><th>What it does</th></tr>
+<tr><td>Check-in</td><td>Daily, 5 to 10 min</td><td>Inbox to zero, pick today's three, tick habits, log a note.</td></tr>
+<tr><td>Curate</td><td>Weekly, 10 min</td><td>Restock the learning queue, write lessons, rescope anything overdue.</td></tr>
+<tr><td>Weekly review</td><td>Weekly, 15 to 30 min</td><td>Shipped list first, then carried tasks, goals, patterns.</td></tr>
+<tr><td>Portfolio</td><td>Quarterly, 20 to 30 min</td><td>Where hours, importance and satisfaction sit across your life.</td></tr></table>
+<p>The assistant edits the JSON files directly. The app picks up its edits when the tab regains focus, or with the reload button.</p>
+
+<h2><span class="n">06</span>Do it</h2>
+<div class="task"><p>Go back to the app tab. Type three things that are in your head right now into the capture box, one at a time, Enter after each. Anything counts. Do not sort them.</p>
+<div class="hint">That is the system running. Sorting happens at check-in, which is card 2.</div></div>
+
+<h2><span class="n">07</span>Check it stuck</h2>
+<div id="q1"></div><div id="q2"></div><div id="q3"></div>
+
+<div class="win"><b>The win:</b> you know what every block on the screen is for and what the app will never do to you. Three items are in the inbox. Card 2 wires in an assistant and clears them.</div>
+
+<div class="foot">This lesson is part of the template. Replace or delete it once your own track is running. Anything unclear? Ask your assistant in this folder; it has read the same files.</div>
+</div>
+<script src="../assets/quiz.js"></script>
+<script>
+timer(document.getElementById("t"), 15);
+quiz(document.getElementById("q1"), { q: "A task goes overdue. What does the app do the next morning?",
+  opts: ["Pins it to the top in red until done", "Shows it once with three change-it moves", "Emails you a reminder about it"], answer: 1,
+  why: "Overdue means you already judged it unimportant. The only useful move is changing the task, so that is all the screen offers." });
+quiz(document.getElementById("q2"), { q: "You press Swap on the learning card twice in a week. What should happen at curation?",
+  opts: ["The card is dealt again unchanged", "The card is shrunk or rescoped", "The card is deleted as a failure"], answer: 1,
+  why: "Two swaps is signal that the card was scoped wrong, not that you were. Curation shrinks it." });
+quiz(document.getElementById("q3"), { q: "You miss eleven days. What does the next check-in look like?",
+  opts: ["A normal check-in, nothing about the gap", "A catch-up walking through each missed day", "A reduced check-in as a penalty"], answer: 0,
+  why: "The restart rule: missed days cost nothing. No backfilling, no listing what was missed. Process the inbox, pick today's three, move on." });
+</script></body></html>

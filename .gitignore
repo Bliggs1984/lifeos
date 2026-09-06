@@ -1,0 +1,15 @@
+# scratch files the rituals create and delete
+portfolio-worksheet.md
+
+# assistant session memory plugins
+.remember/
+.claude/settings.local.json
+
+# OS noise
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# editors
+.vscode/
+.idea/

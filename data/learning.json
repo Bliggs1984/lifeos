@@ -1,0 +1,49 @@
+{
+  "tracks": [
+    {
+      "id": "tr_start",
+      "name": "Getting started",
+      "artifact": "A LifeOS set up the way you want it: your caps, your assistant wired in, your first real track defined",
+      "sessions": 3,
+      "status": "active",
+      "created": "2026-09-06"
+    }
+  ],
+  "queue": [
+    {
+      "id": "c_start01",
+      "track": "tr_start",
+      "title": "How this system works, in fifteen minutes",
+      "do": "Read the one lesson that explains the deck, the overdue mechanic and the rituals. Then capture three things that are in your head right now.",
+      "minutes": 15,
+      "lesson": "learning/lessons/0001-how-lifeos-works.html",
+      "link": null,
+      "status": "queued",
+      "added": "2026-09-06"
+    },
+    {
+      "id": "c_start02",
+      "track": "tr_start",
+      "title": "Wire in an assistant and run your first check-in",
+      "do": "Open this folder in Claude Code or another coding assistant, point it at CLAUDE.md, and run the check-in ritual. Inbox to zero, three tasks starred.",
+      "minutes": 20,
+      "lesson": "learning/lessons/0002-first-checkin.html",
+      "link": null,
+      "status": "queued",
+      "added": "2026-09-06"
+    },
+    {
+      "id": "c_start03",
+      "track": "tr_start",
+      "title": "Define your first real learning track",
+      "do": "Write learning/MISSION.md with your assistant, agree one track with a tangible artifact, then run the curate ritual to deal your first hand of cards.",
+      "minutes": 25,
+      "lesson": "learning/lessons/0003-first-track.html",
+      "link": null,
+      "status": "queued",
+      "added": "2026-09-06"
+    }
+  ],
+  "ledger": [],
+  "notToday": null
+}

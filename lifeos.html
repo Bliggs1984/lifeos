@@ -1,0 +1,1412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LifeOS</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>◉</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #1F2227;
+    --surface: #272B31;
+    --surface2: #2F343B;
+    --line: #3A4048;
+    --text: #EDE9E0;
+    --muted: #9BA0A8;
+    --faint: #666C75;
+    --amber: #E8A33D;
+    --amber-dim: #5C4321;
+    --amber-ink: #1B1409;
+    --teal: #55B9A5;
+    --teal-dim: #274842;
+    --red: #DC6B5F;
+    --violet: #A395CC;
+    --blue: #84B4DA;
+    --blue-ink: #0F1A24;
+    --sans: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+    --mono: "IBM Plex Mono", Consolas, monospace;
+    --r-lg: 14px; --r-md: 9px; --r-sm: 6px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { background: var(--bg); }
+  body {
+    font-family: var(--sans);
+    color: var(--text);
+    background: var(--bg);
+    min-height: 100vh;
+    font-size: 15.5px;
+    line-height: 1.5;
+    font-optical-sizing: auto;
+  }
+  .wrap { max-width: 680px; margin: 0 auto; padding: 44px 24px 90px; }
+  :focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; border-radius: 4px; }
+  button, input { font-family: inherit; }
+
+  /* ---------- header: the slate ---------- */
+  header { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; }
+  .eyebrow { display: none; }
+  h1.date {
+    font-weight: 700; font-size: 38px; letter-spacing: -0.02em; line-height: 1.05;
+  }
+  h1.date small { display: block; font-weight: 500; font-size: 14px; color: var(--muted); letter-spacing: 0; margin-bottom: 4px; }
+  .statusline { font-size: 14px; color: var(--muted); margin: 10px 0 30px; min-height: 21px; }
+  .statusline .warn { color: var(--amber); }
+  .statusline .ok { color: var(--teal); }
+  button.ghost {
+    background: none; border: 1px solid var(--line); color: var(--muted);
+    font-size: 13px; padding: 7px 11px; border-radius: var(--r-sm);
+    cursor: pointer; transition: color .15s, border-color .15s; white-space: nowrap;
+  }
+  button.ghost:hover { color: var(--text); border-color: var(--faint); }
+
+  /* ---------- capture ---------- */
+  .capture { position: relative; margin-bottom: 40px; }
+  .capture input {
+    width: 100%; background: var(--surface); border: 1px solid var(--line);
+    border-radius: var(--r-md); padding: 13px 52px 13px 16px; color: var(--text);
+    font-size: 15.5px; outline: none; transition: border-color .15s;
+  }
+  .capture input:focus { border-color: var(--amber); }
+  .capture input::placeholder { color: var(--faint); }
+  .capture .key {
+    position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+    font-family: var(--mono); font-size: 11px; color: var(--faint);
+    border: 1px solid var(--line); border-radius: 4px; padding: 2px 6px; pointer-events: none;
+  }
+  .capture.saved input { border-color: var(--teal); }
+
+  /* ---------- sections ---------- */
+  section { margin-bottom: 40px; }
+  .sec-head {
+    display: flex; align-items: baseline; justify-content: space-between;
+    border-bottom: 1px solid var(--line); padding-bottom: 7px; margin-bottom: 10px;
+  }
+  .sec-head h2 { font-size: 15px; font-weight: 600; color: var(--muted); letter-spacing: 0; }
+  .sec-head .count { font-family: var(--mono); font-size: 12px; color: var(--faint); font-variant-numeric: tabular-nums; }
+  .empty { color: var(--faint); font-size: 14px; padding: 6px 0; }
+
+  /* ---------- inbox ---------- */
+  .inbox-item { display: flex; align-items: center; gap: 10px; padding: 8px 0; color: var(--text); font-size: 15px; }
+  .inbox-item .txt { flex: 1; }
+  .inbox-item .mini {
+    background: none; border: 1px solid var(--line); border-radius: var(--r-sm);
+    color: var(--muted); font-size: 12.5px; padding: 4px 9px; cursor: pointer; white-space: nowrap;
+  }
+  .inbox-item .mini:hover { color: var(--text); border-color: var(--faint); }
+  .inbox-item .mini.del:hover { color: var(--red); border-color: var(--red); }
+
+  /* ---------- tasks: one row, controls appear when you reach for them ---------- */
+  .task { display: flex; align-items: center; gap: 12px; padding: 9px 6px 9px 0; border-radius: var(--r-sm); }
+  .task:hover, .task:focus-within { background: rgba(255,255,255,.025); }
+  .task .box {
+    width: 20px; height: 20px; border: 1.5px solid var(--faint); border-radius: 6px;
+    cursor: pointer; flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+    transition: border-color .15s, background .15s;
+  }
+  .task .box:hover { border-color: var(--teal); }
+  .task.done .box { background: var(--teal); border-color: var(--teal); }
+  .task.done .box::after { content: "✓"; color: var(--bg); font-size: 13px; font-weight: 700; }
+  .task .title { flex: 1; font-size: 15.5px; }
+  .task.done .title { color: var(--faint); text-decoration: line-through; }
+  .task .due { font-family: var(--mono); font-size: 11.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .task .due.over { color: var(--red); }
+  .task .star, .task .bolt, .task .menu {
+    background: none; border: none; cursor: pointer; color: var(--faint);
+    padding: 3px 5px; line-height: 1; border-radius: 4px; transition: color .15s, opacity .15s;
+    opacity: 0;
+  }
+  .task:hover .star, .task:hover .bolt, .task:hover .menu,
+  .task:focus-within .star, .task:focus-within .bolt, .task:focus-within .menu,
+  .task .star.on { opacity: 1; }
+  .task .star { font-size: 16px; }
+  .task .star:hover, .task .star.on { color: var(--amber); }
+  .task .bolt { font-family: var(--mono); font-size: 14px; }
+  .task .bolt:hover { color: var(--violet); }
+  .task .menu { font-size: 16px; }
+  .task .menu:hover { color: var(--text); }
+  .focus-list .task { padding: 11px 12px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-md); margin-bottom: 8px; }
+  .focus-list .task .title { font-weight: 600; }
+  .focus-list .task .star { opacity: 1; }
+  .task .wait {
+    font-size: 12px; color: var(--amber); border: 1px solid var(--amber-dim); border-radius: var(--r-sm);
+    padding: 2px 7px; max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .task .zz { font-family: var(--mono); font-size: 11.5px; color: var(--faint); }
+  .task .rs { font-size: 12px; color: var(--violet); border: 1px solid var(--violet); border-radius: var(--r-sm); padding: 2px 7px; }
+  details.someday { margin-top: 10px; }
+  details.someday summary { font-size: 13px; color: var(--faint); cursor: pointer; list-style: disclosure-closed; padding: 4px 0; }
+  details.someday[open] summary { list-style: disclosure-open; }
+  details.someday summary:hover { color: var(--muted); }
+
+  /* ---------- habits: timeline with a playhead (the app's signature) ---------- */
+  .tracks { display: grid; grid-template-columns: minmax(90px, 1fr) auto auto; row-gap: 6px; column-gap: 14px; align-items: center; }
+  .tracks .tick-row { display: contents; }
+  .tick-cells { display: flex; gap: 3px; position: relative; }
+  .tick { width: 17px; font-family: var(--mono); font-size: 9px; color: var(--faint); text-align: center; text-transform: uppercase; }
+  .tick.today { color: var(--amber); }
+  .playhead { position: absolute; top: -8px; width: 17px; text-align: center; color: var(--amber); font-size: 8px; line-height: 1; }
+  .habit-name { font-size: 15px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .cells { display: flex; gap: 3px; }
+  .cell { width: 17px; height: 22px; border-radius: 3px; background: var(--surface2); border: 1px solid transparent; }
+  .cell.on { background: var(--teal-dim); border-color: var(--teal); }
+  .cell.today { border-color: var(--line); cursor: pointer; }
+  .cell.today:hover { border-color: var(--teal); }
+  .cell.today.on { background: var(--teal); border-color: var(--teal); }
+  .run { font-family: var(--mono); font-size: 11.5px; color: var(--muted); text-align: right; min-width: 42px; font-variant-numeric: tabular-nums; }
+  .run b { color: var(--teal); font-weight: 500; }
+
+  /* ---------- goals ---------- */
+  .goal { padding: 11px 0; border-bottom: 1px solid var(--surface2); }
+  .goal:last-child { border-bottom: none; }
+  .goal .g-title { font-weight: 600; font-size: 16px; }
+  .goal .g-title a { color: inherit; text-decoration: none; border-bottom: 1px solid var(--line); }
+  .goal .g-title a:hover { border-color: var(--muted); }
+  .goal .g-next { font-size: 14px; color: var(--muted); margin-top: 2px; }
+  .goal .g-next .arrow { display: none; }
+  .goal .g-next.none { color: var(--red); }
+
+  /* ---------- task menu ---------- */
+  .tm { display: grid; gap: 6px; }
+  .tm .lab { font-size: 12.5px; color: var(--faint); margin-top: 12px; }
+  .tm .grp { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+  .tm button {
+    background: none; border: 1px solid var(--line); border-radius: var(--r-sm);
+    color: var(--muted); font-size: 13.5px; padding: 8px 12px; cursor: pointer; transition: color .15s, border-color .15s;
+  }
+  .tm button:hover { color: var(--text); border-color: var(--faint); }
+  .tm button.warn:hover { color: var(--red); border-color: var(--red); }
+  .tm button.on { color: var(--amber); border-color: var(--amber-dim); }
+  .tm input[type="text"], .tm input[type="date"] {
+    background: var(--bg); border: 1px solid var(--line); border-radius: var(--r-sm);
+    color: var(--text); padding: 8px 10px; font-size: 14px; outline: none;
+  }
+  .tm input:focus { border-color: var(--amber); }
+  .tm input[type="text"] { flex: 1; min-width: 140px; }
+  .tm input[type="date"] { color-scheme: dark; }
+
+  /* ---------- day cleared + shipped ---------- */
+  .cleared {
+    display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap;
+    border: 1px solid var(--teal); background: rgba(85,185,165,.08);
+    border-radius: var(--r-lg); padding: 14px 18px; margin-bottom: 28px; animation: clearin .5s ease;
+  }
+  @keyframes clearin { from { opacity: 0; transform: translateY(-5px); } }
+  .cleared .big { font-weight: 700; font-size: 19px; color: var(--teal); }
+  .cleared .sub { font-size: 14px; color: var(--muted); }
+
+  /* ---------- morning deck: the two cards ---------- */
+  .deck { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 32px; }
+  .card {
+    background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg);
+    padding: 18px 20px 16px; display: flex; flex-direction: column; gap: 9px; min-height: 170px;
+    position: relative;
+  }
+  .card .k { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 13px; color: var(--muted); white-space: nowrap; }
+  .card .k span::before {
+    content: ""; display: inline-block; width: 8px; height: 8px; border-radius: 50%;
+    margin-right: 8px; vertical-align: 1px; background: var(--amber); box-shadow: 0 0 0 3px rgba(232,163,61,.18);
+  }
+  .card.move .k span::before { background: var(--blue); box-shadow: 0 0 0 3px rgba(132,180,218,.18); }
+  .card .k b { font-weight: 500; color: var(--faint); }
+  .card .t { font-weight: 700; font-size: 20px; line-height: 1.22; letter-spacing: -0.01em; }
+  .card .t a { color: inherit; text-decoration: none; }
+  .card .t a:hover { color: var(--amber); }
+  .card.move .t a:hover { color: var(--blue); }
+  .card .do { font-size: 14px; color: var(--muted); line-height: 1.5; }
+  .card .prog { font-size: 12.5px; color: var(--muted); display: flex; align-items: center; gap: 9px; flex-wrap: wrap; margin-top: 2px; }
+  .card .dots { display: inline-flex; gap: 3px; padding: 3px; background: var(--bg); border-radius: 4px; }
+  .card .dot { width: 14px; height: 10px; border-radius: 2px; background: var(--surface2); }
+  .card .dot.on { background: var(--amber); }
+  .card .prog .unlock { color: var(--faint); flex-basis: 100%; }
+  .card .prog .unlock.hit { color: var(--teal); }
+  .card .acts { display: flex; gap: 4px; align-items: center; flex-wrap: wrap; margin-top: auto; padding-top: 8px; }
+  .card .acts button, .card .acts a.btn {
+    background: none; border: none; border-radius: var(--r-sm); color: var(--muted);
+    font-size: 13.5px; padding: 7px 8px; cursor: pointer; text-decoration: none; transition: color .15s, background .15s; white-space: nowrap;
+  }
+  .card .acts button:hover, .card .acts a.btn:hover { color: var(--text); background: rgba(255,255,255,.05); }
+  .card .acts button.go, .card .acts a.go {
+    background: var(--amber); color: var(--amber-ink); font-weight: 600; padding: 7px 13px;
+  }
+  .card .acts button.go:hover, .card .acts a.go:hover { filter: brightness(1.06); color: var(--amber-ink); }
+  .card.move .acts a.go, .card.move .acts button.go { background: var(--blue); color: var(--blue-ink); }
+  .card.move .acts a.go:hover, .card.move .acts button.go:hover { color: var(--blue-ink); }
+  .card .acts .sp { flex: 1; }
+  .card .empty { padding: 0; }
+  .card .takeaway { display: flex; gap: 6px; width: 100%; }
+  .card .takeaway input {
+    flex: 1; min-width: 0; background: var(--bg); border: 1px solid var(--amber-dim); border-radius: var(--r-sm);
+    color: var(--text); padding: 8px 10px; font-size: 14px; outline: none;
+  }
+  .card .takeaway input:focus { border-color: var(--amber); }
+  .card .quiet { font-size: 14px; color: var(--faint); }
+  .card .quiet button { background: none; border: none; color: var(--muted); font-size: 13px; cursor: pointer; text-decoration: underline; padding: 0; margin-left: 6px; }
+  .card .quiet button:hover { color: var(--text); }
+
+  /* ---------- overdue: change the task, don't nag ---------- */
+  .odue {
+    border: 1px solid rgba(220,107,95,.55); border-radius: var(--r-md); padding: 13px 16px; margin-bottom: 12px;
+    background: rgba(220,107,95,.06);
+  }
+  .odue .k { font-size: 13px; color: var(--red); margin-bottom: 3px; }
+  .odue .t { font-weight: 600; font-size: 16px; }
+  .odue .bite { font-size: 14px; color: var(--muted); margin-top: 3px; }
+  .odue .bite b { color: var(--text); font-weight: 400; }
+  .odue .acts { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 10px; align-items: center; }
+  .odue .acts button {
+    background: none; border: none; border-radius: var(--r-sm); color: var(--muted);
+    font-size: 14px; padding: 7px 10px; cursor: pointer;
+  }
+  .odue .acts button:hover { color: var(--text); background: rgba(255,255,255,.05); }
+  .odue .acts button.go { background: var(--teal); color: var(--bg); font-weight: 600; padding: 7px 13px; }
+  .odue .acts button.go:hover { color: var(--bg); filter: brightness(1.06); }
+  .odue .acts button:disabled { opacity: .4; cursor: default; background: var(--surface2); color: var(--muted); }
+
+  /* ---------- overlays (task menu, unstick) ---------- */
+  .ov {
+    position: fixed; inset: 0; z-index: 50; overflow-y: auto;
+    background: rgba(18, 20, 24, 0.82); backdrop-filter: blur(3px);
+    display: flex; align-items: flex-start; justify-content: center; padding: 7vh 20px 60px;
+  }
+  .ov-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); width: 100%; max-width: 560px; padding: 22px 26px 26px; }
+  .ov-head { display: flex; align-items: baseline; justify-content: space-between; border-bottom: 1px solid var(--line); padding-bottom: 10px; margin-bottom: 16px; }
+  .ov-head h2 { font-size: 15px; font-weight: 600; color: var(--muted); }
+  .ov-head .x { background: none; border: none; color: var(--faint); cursor: pointer; font-size: 13px; padding: 0 2px; }
+  .ov-head .x:hover { color: var(--red); }
+  .ov-task { font-weight: 700; font-size: 19px; line-height: 1.3; margin-bottom: 4px; letter-spacing: -0.01em; }
+  .ov-q { font-size: 14px; color: var(--muted); margin-bottom: 18px; }
+
+  .st-list { display: grid; gap: 7px; }
+  .st {
+    display: flex; align-items: flex-start; gap: 11px; text-align: left; cursor: pointer;
+    background: var(--surface2); border: 1px solid var(--line); border-left: 3px solid var(--c);
+    border-radius: var(--r-md); padding: 11px 13px; color: var(--text); font-size: 14.5px; transition: background .15s;
+  }
+  .st:hover { background: #363B43; }
+  .st .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--c); flex-shrink: 0; margin-top: 7px; }
+  .st .n { display: block; font-weight: 600; color: var(--c); font-size: 15px; }
+  .st .d { display: block; color: var(--muted); font-size: 13px; line-height: 1.4; margin-top: 1px; }
+  .ov-hist { font-size: 12.5px; color: var(--faint); margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--surface2); }
+  .ov-hist b { color: var(--muted); font-weight: 500; }
+  .iv-t { font-weight: 700; font-size: 20px; margin-bottom: 10px; letter-spacing: -0.01em; }
+  .iv-do { font-size: 15px; line-height: 1.6; margin-bottom: 14px; }
+  .iv-why { font-size: 13.5px; color: var(--muted); line-height: 1.55; border-left: 2px solid var(--line); padding-left: 12px; }
+  .iv-why span { display: block; font-size: 12px; color: var(--faint); margin-bottom: 3px; }
+  .ov-timer { border: 1px solid var(--line); border-radius: var(--r-md); padding: 14px; margin: 16px 0; text-align: center; background: var(--bg); }
+  .ov-clock { font-family: var(--mono); font-size: 30px; color: var(--faint); letter-spacing: 0.04em; line-height: 1.2; font-variant-numeric: tabular-nums; }
+  .ov-clock.is-run { color: var(--c); }
+  .ov-clock.is-done { color: var(--teal); animation: blip 1.1s ease-in-out infinite; }
+  @keyframes blip { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+  .ov-tlabel { font-size: 12.5px; color: var(--faint); margin: 5px 0 11px; }
+  .ov-presets { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; }
+  .ov-presets button { background: none; border: 1px solid var(--line); color: var(--muted); font-family: var(--mono); font-size: 11.5px; padding: 5px 10px; border-radius: var(--r-sm); cursor: pointer; }
+  .ov-presets button:hover { color: var(--c); border-color: var(--c); }
+  .ov-acts { display: flex; gap: 8px; flex-wrap: wrap; }
+  .ov-acts button { font-size: 14px; padding: 10px 16px; border-radius: var(--r-sm); cursor: pointer; border: 1px solid var(--line); background: none; color: var(--muted); }
+  .ov-acts button:hover { color: var(--text); border-color: var(--faint); }
+  .ov-acts button.go { background: var(--c); border-color: var(--c); color: #14161A; font-weight: 600; }
+  .ov-acts button.go:hover { filter: brightness(1.08); color: #14161A; }
+
+  /* ---------- connect screen ---------- */
+  .connect { max-width: 420px; margin: 18vh auto 0; text-align: center; padding: 0 24px; }
+  .connect .eyebrow { display: block; font-size: 14px; color: var(--muted); }
+  .connect h1 { font-size: 32px; font-weight: 700; margin: 10px 0 10px; letter-spacing: -0.02em; }
+  .connect p { color: var(--muted); font-size: 15px; margin-bottom: 24px; }
+  .connect button.primary { background: var(--amber); color: var(--amber-ink); border: none; border-radius: var(--r-md); font-weight: 600; font-size: 15.5px; padding: 12px 24px; cursor: pointer; }
+  .connect button.primary:hover { filter: brightness(1.06); }
+  .connect .note { font-family: var(--mono); font-size: 11.5px; color: var(--faint); margin-top: 16px; }
+  .hidden { display: none !important; }
+
+  @media (prefers-reduced-motion: reduce) { .cleared, .ov-clock.is-done { animation: none; } * { transition: none !important; } }
+  @media (max-width: 640px) { .deck { grid-template-columns: 1fr; } }
+  @media (max-width: 480px) {
+    h1.date { font-size: 30px; }
+    .tracks { grid-template-columns: 1fr; row-gap: 2px; }
+    .run, .tick-row .run-spacer { display: none; }
+    .task .star, .task .bolt, .task .menu { opacity: 1; }
+  }
+</style>
+</head>
+<body>
+
+<div id="connectView" class="connect hidden">
+  <div class="eyebrow">Life OS</div>
+  <h1>Connect your folder</h1>
+  <p>Pick the <b>LifeOS</b> folder once and your browser remembers it. Everything stays in plain files on this PC.</p>
+  <button class="primary" id="connectBtn">Choose LifeOS folder</button>
+  <p class="note" id="connectNote">Usually the folder this file lives in. It needs a data/ subfolder; the app creates it.</p>
+</div>
+
+<div id="appView" class="wrap hidden">
+  <header>
+    <div>
+      <div class="eyebrow">Life OS</div>
+      <h1 class="date" id="bigDate"></h1>
+    </div>
+    <div style="display:flex;gap:7px">
+      <button class="ghost" id="unstickBtn" title="Stuck on something? Triage it">↯ unstick</button>
+      <button class="ghost" id="reloadBtn" title="Reload from disk (picks up edits made outside the app)">⟳ reload</button>
+    </div>
+  </header>
+  <div class="statusline" id="statusline"></div>
+
+  <div id="dayCleared" class="cleared hidden"></div>
+
+  <div class="deck">
+    <div class="card learn" id="learnCard"></div>
+    <div class="card move" id="moveCard"></div>
+  </div>
+
+  <div id="overdueArea"></div>
+
+  <div class="capture" id="captureWrap">
+    <input id="captureInput" type="text" placeholder="Capture anything. It lands in the inbox, sorted later." autocomplete="off">
+    <span class="key">↵</span>
+  </div>
+
+  <section id="inboxSec">
+    <div class="sec-head"><h2>Inbox</h2><span class="count" id="inboxCount"></span></div>
+    <div id="inboxList"></div>
+  </section>
+
+  <section>
+    <div class="sec-head"><h2>Focus today</h2><span class="count" id="focusCount"></span></div>
+    <div class="focus-list" id="focusList"></div>
+  </section>
+
+  <section>
+    <div class="sec-head"><h2>Tasks</h2><span class="count" id="taskCount"></span></div>
+    <div id="taskList"></div>
+    <details class="someday" id="snoozedWrap">
+      <summary id="snoozedSummary">Snoozed</summary>
+      <div id="snoozedList"></div>
+    </details>
+    <details class="someday" id="somedayWrap">
+      <summary id="somedaySummary">Someday</summary>
+      <div id="somedayList"></div>
+    </details>
+  </section>
+
+  <section>
+    <div class="sec-head"><h2>Habits</h2><span class="count" id="habitCount"></span></div>
+    <div id="habitArea"></div>
+  </section>
+
+  <section>
+    <div class="sec-head"><h2>Goals</h2><span class="count" id="goalCount"></span></div>
+    <div id="goalList"></div>
+  </section>
+
+  <section id="shippedSec" class="hidden">
+    <details class="someday">
+      <summary id="shippedSummary">Shipped this week</summary>
+      <div id="shippedList"></div>
+    </details>
+  </section>
+</div>
+
+<div id="taskOv" class="ov hidden">
+  <div class="ov-card">
+    <div class="ov-head">
+      <h2>Task</h2>
+      <button class="x" id="tmClose" title="Close (Esc)">✕ esc</button>
+    </div>
+    <div id="tmBody"></div>
+  </div>
+</div>
+
+<div id="unstickOv" class="ov hidden">
+  <div class="ov-card">
+    <div class="ov-head">
+      <h2 id="ovStage">Unstick</h2>
+      <button class="x" id="ovClose" title="Close (Esc)">✕ esc</button>
+    </div>
+    <div id="ovBody"></div>
+  </div>
+</div>
+
+<script>
+"use strict";
+
+/* ================= storage: folder handle in IndexedDB ================= */
+const DB_NAME = "lifeos", STORE = "handles";
+function idb() {
+  return new Promise((res, rej) => {
+    const rq = indexedDB.open(DB_NAME, 1);
+    rq.onupgradeneeded = () => rq.result.createObjectStore(STORE);
+    rq.onsuccess = () => res(rq.result);
+    rq.onerror = () => rej(rq.error);
+  });
+}
+async function idbGet(key) {
+  const db = await idb();
+  return new Promise((res, rej) => {
+    const rq = db.transaction(STORE).objectStore(STORE).get(key);
+    rq.onsuccess = () => res(rq.result);
+    rq.onerror = () => rej(rq.error);
+  });
+}
+async function idbSet(key, val) {
+  const db = await idb();
+  return new Promise((res, rej) => {
+    const tx = db.transaction(STORE, "readwrite");
+    tx.objectStore(STORE).put(val, key);
+    tx.oncomplete = () => res();
+    tx.onerror = () => rej(tx.error);
+  });
+}
+
+/* ================= data layer ================= */
+/* Caps. Change here and the UI follows. Three focus tasks and five habits are the
+   defaults the design was tuned around; more of either stops being a shortlist. */
+const FOCUS_MAX = 3, HABIT_MAX = 5;
+
+let rootHandle = null, dataHandle = null;
+const FILES = ["inbox", "tasks", "habits", "goals", "unstick"];
+const LEARN_EMPTY = { tracks: [], queue: [], ledger: [], notToday: null };
+const state = { inbox: [], tasks: [], habits: [], goals: [], unstick: [], learning: LEARN_EMPTY, today: null };
+
+async function readFile(name) {
+  try {
+    const fh = await dataHandle.getFileHandle(name + ".json", { create: true });
+    const f = await fh.getFile();
+    const txt = await f.text();
+    if (!txt.trim()) return [];
+    return JSON.parse(txt);
+  } catch (e) {
+    console.error("[LifeOS] read failed:", name, e);
+    return [];
+  }
+}
+async function writeFile(name) {
+  const fh = await dataHandle.getFileHandle(name + ".json", { create: true });
+  const w = await fh.createWritable();
+  await w.write(JSON.stringify(state[name], null, 2) + "\n");
+  await w.close();
+}
+async function loadAll() {
+  for (const f of FILES) state[f] = await readFile(f);
+  const L = await readFile("learning");
+  state.learning = (L && !Array.isArray(L)) ? Object.assign({}, LEARN_EMPTY, L) : Object.assign({}, LEARN_EMPTY);
+  // today.json is optional: one object written by an outside process (an assistant,
+  // a script, another app) naming today's single most important move. See CLAUDE.md.
+  const T = await readFile("today");
+  state.today = (T && !Array.isArray(T) && typeof T === "object") ? T : null;
+  render();
+}
+
+/* ================= helpers ================= */
+const uid = p => p + "_" + Math.random().toString(36).slice(2, 8);
+function todayStr(offset = 0) {
+  const d = new Date(); d.setDate(d.getDate() + offset);
+  return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+}
+function esc(s) { const d = document.createElement("div"); d.textContent = s; return d.innerHTML; }
+function streak(log) {
+  const set = new Set(log);
+  let run = 0, day = set.has(todayStr()) ? 0 : -1; // run may still be alive if today not yet done
+  while (set.has(todayStr(day - run))) run++;
+  return run;
+}
+
+/* ================= render ================= */
+function render() {
+  const today = todayStr();
+
+  // header
+  const d = new Date();
+  document.getElementById("bigDate").innerHTML =
+    "<small>" + d.toLocaleDateString(undefined, { weekday: "long" }) + "</small>" +
+    d.toLocaleDateString(undefined, { day: "numeric", month: "long" });
+
+  // inbox
+  const inboxList = document.getElementById("inboxList");
+  document.getElementById("inboxCount").textContent = state.inbox.length || "";
+  inboxList.innerHTML = state.inbox.length ? "" : '<div class="empty">Inbox zero. Anything you capture above lands here.</div>';
+  state.inbox.forEach(item => {
+    const row = document.createElement("div");
+    row.className = "inbox-item";
+    row.innerHTML = '<span class="txt">' + esc(item.text) + '</span>' +
+      '<button class="mini" data-act="promote">Make a task</button>' +
+      '<button class="mini del" data-act="del">✕</button>';
+    row.querySelector('[data-act="promote"]').onclick = () => promoteInbox(item.id);
+    row.querySelector('[data-act="del"]').onclick = () => deleteInbox(item.id);
+    inboxList.appendChild(row);
+  });
+
+  renderDeck(today);
+
+  // tasks — snoozed items sit out until their wake date
+  const isSnoozed = t => t.snooze && t.snooze > today;
+  const isOverdue = t => t.status === "todo" && t.due && t.due < today && !isSnoozed(t);
+  renderOverdue(state.tasks.filter(isOverdue), today);
+  const focus = state.tasks.filter(t => t.status !== "done" && t.focus && !isSnoozed(t) && !isOverdue(t));
+  const doneToday = state.tasks.filter(t => t.status === "done" && t.completed === today);
+  const open = state.tasks.filter(t => t.status === "todo" && !t.focus && !isSnoozed(t) && !isOverdue(t));
+  const snoozed = state.tasks.filter(t => t.status !== "done" && isSnoozed(t))
+    .sort((a, b) => a.snooze.localeCompare(b.snooze));
+  const someday = state.tasks.filter(t => t.status === "someday" && !isSnoozed(t));
+
+  const focusList = document.getElementById("focusList");
+  document.getElementById("focusCount").textContent = focus.length ? focus.length + "/" + FOCUS_MAX : "";
+  const doneFocus = doneToday.filter(t => t.focus);
+  focusList.innerHTML = focus.length + doneFocus.length ? "" :
+    '<div class="empty">Nothing in focus yet. Star up to ' + FOCUS_MAX + ' tasks below.</div>';
+  focus.forEach(t => focusList.appendChild(taskRow(t, today)));
+  doneFocus.forEach(t => focusList.appendChild(taskRow(t, today)));
+
+  const taskList = document.getElementById("taskList");
+  document.getElementById("taskCount").textContent = open.length || "";
+  taskList.innerHTML = open.length ? "" : '<div class="empty">No open tasks. Capture one above.</div>';
+  open.forEach(t => taskList.appendChild(taskRow(t, today)));
+  doneToday.filter(t => !t.focus).forEach(t => taskList.appendChild(taskRow(t, today)));
+
+  const snoozedWrap = document.getElementById("snoozedWrap");
+  snoozedWrap.classList.toggle("hidden", !snoozed.length);
+  document.getElementById("snoozedSummary").textContent = "Snoozed (" + snoozed.length + ")";
+  const snoozedList = document.getElementById("snoozedList");
+  snoozedList.innerHTML = "";
+  snoozed.forEach(t => snoozedList.appendChild(taskRow(t, today)));
+
+  const somedayWrap = document.getElementById("somedayWrap");
+  somedayWrap.classList.toggle("hidden", !someday.length);
+  document.getElementById("somedaySummary").textContent = "Someday (" + someday.length + ")";
+  const somedayList = document.getElementById("somedayList");
+  somedayList.innerHTML = "";
+  someday.forEach(t => somedayList.appendChild(taskRow(t, today)));
+
+  renderHabits(today);
+
+  // goals
+  const goals = state.goals.filter(g => g.status === "active");
+  document.getElementById("goalCount").textContent = goals.length || "";
+  const goalList = document.getElementById("goalList");
+  goalList.innerHTML = goals.length ? "" : '<div class="empty">No goals yet. They get set at check-in.</div>';
+  goals.forEach(g => {
+    const el = document.createElement("div");
+    el.className = "goal";
+    const title = g.link
+      ? '<a href="' + esc(g.link) + '" target="_blank" rel="noopener" style="color:inherit">' + esc(g.title) + ' <span style="color:var(--faint);font-family:var(--mono);font-size:11px">↗</span></a>'
+      : esc(g.title);
+    el.innerHTML = '<div class="g-title">' + title + '</div>' +
+      (g.next
+        ? '<div class="g-next">' + esc(g.next) + '</div>'
+        : '<div class="g-next none">No next action yet. Set one at check-in.</div>');
+    goalList.appendChild(el);
+  });
+
+  // day cleared — had focus tasks, finished them all, habits ticked (if any tracked)
+  const allFocusDone = doneFocus.length > 0 && focus.length === 0;
+  const habitsAll = !state.habits.length || state.habits.every(h => h.log.includes(today));
+  const cleared = allFocusDone && habitsAll;
+  const clr = document.getElementById("dayCleared");
+  clr.classList.toggle("hidden", !cleared);
+  if (cleared) clr.innerHTML = '<span class="big">Day cleared.</span>' +
+    '<span class="sub">Focus done' + (state.habits.length ? ", habits ticked" : "") + '. Anything else today is a bonus.</span>';
+
+  // shipped this week — wins stay visible, ADHD memory deletes them otherwise
+  const weekAgo = todayStr(-6);
+  const shipped = state.tasks
+    .filter(t => t.status === "done" && t.completed && t.completed >= weekAgo)
+    .sort((a, b) => b.completed.localeCompare(a.completed));
+  document.getElementById("shippedSec").classList.toggle("hidden", !shipped.length);
+  document.getElementById("shippedSummary").textContent = "Shipped this week (" + shipped.length + ")";
+  const shippedList = document.getElementById("shippedList");
+  shippedList.innerHTML = "";
+  shipped.forEach(t => shippedList.appendChild(taskRow(t, today)));
+
+  // status line
+  const habitsDone = state.habits.filter(h => h.log.includes(today)).length;
+  const bits = [];
+  if (state.learning.ledger.some(e => e.date === today)) bits.push('<span class="ok">Learning done</span>');
+  bits.push(state.inbox.length ? state.inbox.length + " in the inbox" : "inbox zero");
+  bits.push(focus.length ? focus.length + " in focus" : "nothing in focus");
+  if (state.habits.length) bits.push("habits " + habitsDone + " of " + state.habits.length);
+  const line = bits.join(",&nbsp; ") + ".";
+  document.getElementById("statusline").innerHTML = line.charAt(0) === "<" ? line : line.charAt(0).toUpperCase() + line.slice(1);
+}
+
+/* ================= morning deck ================= */
+function renderDeck(today) {
+  const L = state.learning;
+  const lc = document.getElementById("learnCard");
+  const tracksById = Object.fromEntries(L.tracks.map(t => [t.id, t]));
+  const doneIn = trId => L.ledger.filter(e => e.track === trId).length;
+  const card = L.queue.find(c => c.status === "queued");
+  const learnedToday = L.ledger.filter(e => e.date === today)[0];
+
+  if (learnedToday) {
+    const tr = tracksById[learnedToday.track];
+    lc.innerHTML =
+      '<div class="k"><span>Today\u2019s learning</span><b>done</b></div>' +
+      '<div class="t">' + esc(learnedToday.title) + '</div>' +
+      '<div class="do">\u201c' + esc(learnedToday.takeaway || "") + '\u201d</div>' +
+      (tr ? progHTML(tr, doneIn(tr.id)) : "") +
+      '<div class="acts"><span class="quiet">Logged. Tomorrow deals the next card.</span></div>';
+  } else if (L.notToday === today) {
+    lc.innerHTML =
+      '<div class="k"><span>Today\u2019s learning</span></div>' +
+      '<div class="quiet">Not today. The same card is back tomorrow, nothing lost.' +
+      '<button id="lnUndo">changed my mind</button></div>';
+    lc.querySelector("#lnUndo").onclick = async () => { L.notToday = null; await writeFile("learning"); render(); };
+  } else if (!card) {
+    lc.innerHTML =
+      '<div class="k"><span>Today\u2019s learning</span></div>' +
+      '<div class="empty">The shelf is empty. Run the curate ritual with your assistant to restock it (see CLAUDE.md).</div>';
+  } else {
+    const tr = tracksById[card.track] || { name: "", artifact: "", sessions: 5, id: card.track };
+    lc.innerHTML =
+      '<div class="k"><span>Today\u2019s learning</span><b>' + (card.minutes || 25) + ' min</b></div>' +
+      '<div class="t"><a href="' + esc(card.lesson || card.link || "#") + '" target="_blank" rel="noopener">' + esc(card.title) + ' \u2197</a></div>' +
+      '<div class="do">' + esc(card.do || "") + '</div>' +
+      progHTML(tr, doneIn(tr.id)) +
+      '<div class="acts" id="lnActs">' +
+        '<button class="go" id="lnDone">Done</button>' +
+        '<button id="lnSwap" title="Deal the next card">Swap</button>' +
+        '<button id="lnSkip" title="Gone for today, back tomorrow">Not today</button>' +
+        (card.link ? '<a class="btn" href="' + esc(card.link) + '" target="_blank" rel="noopener">Source</a>' : "") +
+      '</div>';
+    lc.querySelector("#lnDone").onclick = () => {
+      const acts = lc.querySelector("#lnActs");
+      acts.innerHTML =
+        '<div class="takeaway" style="flex:1"><input id="lnTake" type="text" placeholder="One line: what did you take from it?" autocomplete="off">' +
+        '<button class="go" id="lnLog">Log it</button></div>';
+      const inp = lc.querySelector("#lnTake");
+      inp.focus();
+      const log = () => learnDone(card, tr, inp.value.trim());
+      lc.querySelector("#lnLog").onclick = log;
+      inp.addEventListener("keydown", e => { if (e.key === "Enter") log(); });
+    };
+    lc.querySelector("#lnSwap").onclick = async () => {
+      L.queue = L.queue.filter(c => c.id !== card.id);
+      card.swaps = (card.swaps || 0) + 1;
+      L.queue.push(card);
+      await writeFile("learning");
+      render();
+    };
+    lc.querySelector("#lnSkip").onclick = async () => { L.notToday = today; await writeFile("learning"); render(); };
+  }
+
+  // move card: today's one most important thing. Fed by data/today.json when an outside
+  // process (an assistant at check-in, a script, another tool) has written one for today;
+  // otherwise it shows the first starred focus task.
+  const mc = document.getElementById("moveCard");
+  const T = state.today;
+  const fresh = T && T.date === today && T.title;
+  const topFocus = state.tasks.find(t => t.status === "todo" && t.focus && !(t.snooze && t.snooze > today));
+  if (fresh) {
+    const head = '<div class="k"><span>Today\u2019s move</span><b>' + esc(T.source || "set for today") + '</b></div>';
+    if (T.done) {
+      mc.innerHTML = head + '<div class="t">' + esc(T.title) + '</div>' +
+        '<div class="acts"><span class="quiet">Done. Anything else today is a bonus.</span></div>';
+    } else {
+      mc.innerHTML = head +
+        '<div class="t">' + (T.link ? '<a href="' + esc(T.link) + '" target="_blank" rel="noopener">' + esc(T.title) + ' \u2197</a>' : esc(T.title)) + '</div>' +
+        (T.note ? '<div class="do">' + esc(T.note) + '</div>' : "") +
+        '<div class="acts">' +
+          '<button class="go" id="mvDone">Done</button>' +
+          (T.link ? '<a class="btn" href="' + esc(T.link) + '" target="_blank" rel="noopener">' + esc(T.linkText || "Open") + '</a>' : "") +
+        '</div>';
+      mc.querySelector("#mvDone").onclick = async () => { T.done = true; await writeFile("today"); render(); };
+    }
+  } else if (topFocus) {
+    const g = topFocus.goal ? state.goals.find(x => x.id === topFocus.goal) : null;
+    mc.innerHTML =
+      '<div class="k"><span>Today\u2019s move</span><b>top focus</b></div>' +
+      '<div class="t">' + esc(topFocus.title) + '</div>' +
+      (g ? '<div class="do">Toward: ' + esc(g.title) + '</div>' : '<div class="do">The first thing you starred. Do it before anything below.</div>') +
+      '<div class="acts">' +
+        '<button class="go" id="mvDone">Done</button>' +
+        '<button id="mvStuck" title="Stuck on this? Unstick it">\u21af Unstick</button>' +
+      '</div>';
+    mc.querySelector("#mvDone").onclick = () => toggleTask(topFocus.id);
+    mc.querySelector("#mvStuck").onclick = () => unOpen(topFocus.title, topFocus.id);
+  } else {
+    mc.innerHTML =
+      '<div class="k"><span>Today\u2019s move</span></div>' +
+      '<div class="quiet">Nothing set. Star a task below and it shows up here, or have your assistant write one to data/today.json at check-in.</div>';
+  }
+}
+function progHTML(tr, done) {
+  const n = tr.sessions || 5, hit = done >= n;
+  let dots = "";
+  for (let i = 0; i < n; i++) dots += '<span class="dot' + (i < done ? " on" : "") + '"></span>';
+  return '<div class="prog"><span class="dots">' + dots + '</span><span>' + Math.min(done, n) + ' of ' + n + ' in ' + esc(tr.name) + '</span>' +
+    '<span class="unlock' + (hit ? " hit" : "") + '">' + (hit ? "Unlocked: " : "Unlocks: ") + esc(tr.artifact || "") + '</span></div>';
+}
+async function learnDone(card, tr, takeaway) {
+  const today = todayStr();
+  const L = state.learning;
+  L.ledger.push({ id: uid("l"), cardId: card.id, track: tr.id, title: card.title, date: today, takeaway: takeaway || null });
+  card.status = "done";
+  card.done = today;
+  // a habit whose name contains "learn" ticks itself — the card *is* the habit
+  const h = state.habits.find(h => /learn/i.test(h.name));
+  if (h && !h.log.includes(today)) { h.log.push(today); h.log.sort(); await writeFile("habits"); }
+  await writeFile("learning");
+  render();
+}
+
+/* ================= overdue: change the task, never nag =================
+   ADHD rule: an overdue task is one you have already judged unimportant. Re-showing
+   it harder trains you to ignore the screen. So the only moves are to change it. */
+function renderOverdue(list, today) {
+  const area = document.getElementById("overdueArea");
+  area.innerHTML = "";
+  list.forEach(t => {
+    const el = document.createElement("div");
+    el.className = "odue";
+    el.innerHTML =
+      '<div class="k">Past due since ' + t.due.slice(5) + '. Change it rather than repeat it.</div>' +
+      '<div class="t">' + esc(t.title) + '</div>' +
+      (t.bite ? '<div class="bite">10-min version: <b>' + esc(t.bite) + '</b></div>'
+              : '<div class="bite">No 10-minute version yet. Rescope flags it so the next curation writes one.</div>') +
+      '<div class="acts">' +
+        '<button class="go" data-a="bite"' + (t.bite ? "" : " disabled") + '>Take the 10-min version</button>' +
+        '<button data-a="rescope">Rescope</button>' +
+        '<button data-a="go">Let it go</button>' +
+        '<button data-a="menu" title="Snooze / due / edit">\u22ef</button>' +
+      '</div>';
+    el.querySelector('[data-a="bite"]').onclick = async () => {
+      t.original = t.title; t.title = t.bite; t.bite = null; t.due = null;
+      if (state.tasks.filter(x => x.focus && x.status !== "done").length < FOCUS_MAX) t.focus = true;
+      await writeFile("tasks"); render();
+    };
+    el.querySelector('[data-a="rescope"]').onclick = async () => {
+      t.rescope = true; t.due = null; t.focus = false;
+      await writeFile("tasks"); render();
+      flashStatus('<span class="warn">Flagged for rescoping at the next curation.</span>');
+    };
+    el.querySelector('[data-a="go"]').onclick = async () => {
+      t.status = "someday"; t.due = null; t.focus = false;
+      await writeFile("tasks"); render();
+    };
+    el.querySelector('[data-a="menu"]').onclick = () => tmOpen(t.id);
+    area.appendChild(el);
+  });
+}
+
+function taskRow(t, today) {
+  const row = document.createElement("div");
+  row.className = "task" + (t.status === "done" ? " done" : "");
+  const overdue = t.due && t.due < today && t.status !== "done";
+  const asleep = t.snooze && t.snooze > today;
+  row.innerHTML =
+    '<div class="box"></div>' +
+    '<span class="title">' + esc(t.title) + '</span>' +
+    (t.blocked ? '<span class="wait" title="' + esc(t.blocked) + '">⏳ ' + esc(t.blocked) + '</span>' : "") +
+    (t.rescope && t.status !== "done" ? '<span class="rs" title="Flagged for rescoping at the weekly curation">↻ rescope</span>' : "") +
+    (asleep ? '<span class="zz">until ' + t.snooze.slice(5) + '</span>' : "") +
+    (t.due ? '<span class="due' + (overdue ? " over" : "") + '">' + t.due.slice(5) + '</span>' : "") +
+    (t.status === "done" ? "" : '<button class="bolt" title="Stuck on this? Unstick it">↯</button>') +
+    '<button class="star' + (t.focus ? " on" : "") + '" title="Focus today (' + FOCUS_MAX + ' at most)">' + (t.focus ? "★" : "☆") + '</button>' +
+    '<button class="menu" title="Snooze, due date, rename, delete">⋯</button>';
+  row.querySelector(".box").onclick = () => toggleTask(t.id);
+  row.querySelector(".star").onclick = () => toggleFocus(t.id);
+  row.querySelector(".menu").onclick = () => tmOpen(t.id);
+  const bolt = row.querySelector(".bolt");
+  if (bolt) bolt.onclick = () => unOpen(t.title, t.id);
+  return row;
+}
+
+function renderHabits(today) {
+  const area = document.getElementById("habitArea");
+  document.getElementById("habitCount").textContent = state.habits.length ? state.habits.length + "/" + HABIT_MAX : "";
+  if (!state.habits.length) {
+    area.innerHTML = '<div class="empty">No habits yet — they\u2019re added during check-in.</div>';
+    return;
+  }
+  const DAYS = 14;
+  const dates = [];
+  for (let i = DAYS - 1; i >= 0; i--) dates.push(todayStr(-i));
+
+  const grid = document.createElement("div");
+  grid.className = "tracks";
+
+  // tick row: weekday initials with playhead on today
+  const tickName = document.createElement("div");
+  const tickCells = document.createElement("div");
+  tickCells.className = "tick-cells";
+  dates.forEach((ds, i) => {
+    const wd = "SMTWTFS"[new Date(ds + "T12:00:00").getDay()];
+    const el = document.createElement("span");
+    el.className = "tick" + (ds === today ? " today" : "");
+    el.textContent = wd;
+    tickCells.appendChild(el);
+    if (ds === today) {
+      const ph = document.createElement("span");
+      ph.className = "playhead";
+      ph.style.left = (i * 20) + "px";
+      ph.textContent = "▼";
+      tickCells.appendChild(ph);
+    }
+  });
+  const tickRun = document.createElement("div");
+  tickRun.className = "run run-spacer";
+  grid.append(tickName, tickCells, tickRun);
+
+  state.habits.forEach(h => {
+    const name = document.createElement("div");
+    name.className = "habit-name";
+    name.textContent = h.name;
+    const cells = document.createElement("div");
+    cells.className = "cells";
+    dates.forEach(ds => {
+      const c = document.createElement("div");
+      c.className = "cell" + (h.log.includes(ds) ? " on" : "") + (ds === today ? " today" : "");
+      if (ds === today) {
+        c.title = "Mark done today";
+        c.onclick = () => toggleHabit(h.id);
+      }
+      cells.appendChild(c);
+    });
+    const run = document.createElement("div");
+    run.className = "run";
+    const s = streak(h.log);
+    run.innerHTML = s ? "run <b>" + s + "</b>" : "—";
+    grid.append(name, cells, run);
+  });
+  area.innerHTML = "";
+  area.appendChild(grid);
+}
+
+/* ================= actions ================= */
+async function capture(text) {
+  state.inbox.push({ id: uid("i"), text, created: new Date().toISOString() });
+  await writeFile("inbox");
+  render();
+}
+async function promoteInbox(id) {
+  const idx = state.inbox.findIndex(i => i.id === id);
+  if (idx < 0) return;
+  const [item] = state.inbox.splice(idx, 1);
+  state.tasks.push({ id: uid("t"), title: item.text, status: "todo", focus: false, created: todayStr(), completed: null, due: null, goal: null });
+  await writeFile("inbox"); await writeFile("tasks");
+  render();
+}
+async function deleteInbox(id) {
+  state.inbox = state.inbox.filter(i => i.id !== id);
+  await writeFile("inbox");
+  render();
+}
+async function toggleTask(id) {
+  const t = state.tasks.find(t => t.id === id);
+  if (!t) return;
+  if (t.status === "done") { t.status = "todo"; t.completed = null; }
+  else { t.status = "done"; t.completed = todayStr(); }
+  await writeFile("tasks");
+  render();
+}
+async function toggleFocus(id) {
+  const t = state.tasks.find(t => t.id === id);
+  if (!t) return;
+  if (!t.focus && state.tasks.filter(x => x.focus && x.status !== "done").length >= FOCUS_MAX) {
+    flashStatus('<span class="warn">Focus is full — ' + FOCUS_MAX + ' max. Unstar something first.</span>');
+    return;
+  }
+  t.focus = !t.focus;
+  if (t.focus && t.status === "someday") t.status = "todo";
+  await writeFile("tasks");
+  render();
+}
+async function toggleHabit(id) {
+  const h = state.habits.find(h => h.id === id);
+  if (!h) return;
+  const today = todayStr();
+  if (h.log.includes(today)) h.log = h.log.filter(d => d !== today);
+  else { h.log.push(today); h.log.sort(); }
+  await writeFile("habits");
+  render();
+}
+let statusTimer = null;
+function flashStatus(html) {
+  const el = document.getElementById("statusline");
+  el.innerHTML = html;
+  clearTimeout(statusTimer);
+  statusTimer = setTimeout(render, 2500);
+}
+
+/* ================= task menu ================= */
+function nextMonday() {
+  const d = new Date();
+  d.setDate(d.getDate() + ((8 - d.getDay()) % 7 || 7));
+  return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+}
+const tmEl = () => document.getElementById("taskOv");
+let tmDeleteArmed = false;
+
+function tmOpen(id) {
+  const t = state.tasks.find(x => x.id === id);
+  if (!t) return;
+  tmDeleteArmed = false;
+  const today = todayStr();
+  const b = document.getElementById("tmBody");
+  b.innerHTML =
+    '<div class="tm">' +
+      '<div class="grp"><input type="text" id="tmTitle" value="' + esc(t.title).replace(/"/g, "&quot;") + '">' +
+      '<button id="tmRename">Save</button></div>' +
+
+      '<div class="lab">Move</div>' +
+      '<div class="grp">' +
+        '<button id="tmFocus"' + (t.focus ? ' class="on"' : "") + '>' + (t.focus ? "★ In focus — remove" : "☆ Focus today") + '</button>' +
+        '<button id="tmSomeday">' + (t.status === "someday" ? "Back to tasks" : "→ Someday") + '</button>' +
+      '</div>' +
+
+      '<div class="lab">Snooze until</div>' +
+      '<div class="grp">' +
+        '<button data-snz="1">Tomorrow</button>' +
+        '<button data-snz="3">+3 days</button>' +
+        '<button data-snz="mon">Next Mon</button>' +
+        '<input type="date" id="tmSnzDate" min="' + todayStr(1) + '">' +
+        (t.snooze && t.snooze > today ? '<button id="tmWake">Wake now</button>' : "") +
+      '</div>' +
+
+      '<div class="lab">Waiting on something?</div>' +
+      '<div class="grp">' +
+        '<input type="text" id="tmBlocked" placeholder="e.g. doctors appointment" value="' + (t.blocked ? esc(t.blocked).replace(/"/g, "&quot;") : "") + '">' +
+        '<button id="tmBlockSave">' + (t.blocked ? "Update" : "Set") + '</button>' +
+        (t.blocked ? '<button id="tmBlockClear">Clear</button>' : "") +
+      '</div>' +
+
+      '<div class="lab">Due date</div>' +
+      '<div class="grp">' +
+        '<input type="date" id="tmDue" value="' + (t.due || "") + '">' +
+        '<button id="tmDueSave">Set</button>' +
+        (t.due ? '<button id="tmDueClear">Clear</button>' : "") +
+        '<span style="flex:1"></span>' +
+        '<button id="tmDelete" class="warn">Delete</button>' +
+      '</div>' +
+    '</div>';
+
+  const save = async () => { await writeFile("tasks"); render(); tmClose(); };
+  document.getElementById("tmRename").onclick = async () => {
+    const v = document.getElementById("tmTitle").value.trim();
+    if (v) { t.title = v; await save(); }
+  };
+  document.getElementById("tmFocus").onclick = async () => {
+    tmClose();
+    await toggleFocus(t.id);
+  };
+  document.getElementById("tmSomeday").onclick = async () => {
+    t.status = t.status === "someday" ? "todo" : "someday";
+    if (t.status === "someday") t.focus = false;
+    await save();
+  };
+  b.querySelectorAll("[data-snz]").forEach(btn => {
+    btn.onclick = async () => {
+      t.snooze = btn.dataset.snz === "mon" ? nextMonday() : todayStr(+btn.dataset.snz);
+      t.focus = false;
+      await save();
+    };
+  });
+  document.getElementById("tmSnzDate").onchange = async e => {
+    if (e.target.value && e.target.value > today) {
+      t.snooze = e.target.value;
+      t.focus = false;
+      await save();
+    }
+  };
+  const wake = document.getElementById("tmWake");
+  if (wake) wake.onclick = async () => { t.snooze = null; await save(); };
+  document.getElementById("tmBlockSave").onclick = async () => {
+    const v = document.getElementById("tmBlocked").value.trim();
+    if (v) { t.blocked = v; await save(); }
+  };
+  const bc = document.getElementById("tmBlockClear");
+  if (bc) bc.onclick = async () => { t.blocked = null; await save(); };
+  document.getElementById("tmDueSave").onclick = async () => {
+    const v = document.getElementById("tmDue").value;
+    if (v) { t.due = v; await save(); }
+  };
+  const dc = document.getElementById("tmDueClear");
+  if (dc) dc.onclick = async () => { t.due = null; await save(); };
+  document.getElementById("tmDelete").onclick = async e => {
+    if (!tmDeleteArmed) {
+      tmDeleteArmed = true;
+      e.target.textContent = "Sure? Delete forever";
+      return;
+    }
+    state.tasks = state.tasks.filter(x => x.id !== t.id);
+    await save();
+  };
+  tmEl().classList.remove("hidden");
+}
+function tmClose() {
+  tmEl().classList.add("hidden");
+  document.getElementById("tmBody").innerHTML = "";
+}
+
+/* ================= unstick ================= */
+/* Emotion-first triage. Routes by what's blocking, not by what's due.
+   Five states, seven interventions each, drawn from executive-function and
+   behaviour-change research (implementation intentions, temptation bundling,
+   body doubling, closed lists, estimation calibration, self-compassion). */
+const UN_STATES = [
+  { id: "stuck", name: "Stuck", c: "var(--amber)",
+    d: "Can't start. Circling it. Perfectionism, indecision, no obvious way in.",
+    q: "You know what it is. You just can’t get in." },
+  { id: "overwhelmed", name: "Overwhelmed", c: "var(--red)",
+    d: "Too much at once. Over-committed, panicking, flattened by the size of it.",
+    q: "Too much at once. Let’s cut it down." },
+  { id: "unmotivated", name: "Unmotivated", c: "var(--teal)",
+    d: "You could. You just don’t want to. Waiting to feel like it, nobody watching.",
+    q: "You could do it. You just don’t want to." },
+  { id: "disorganized", name: "Disorganized", c: "var(--violet)",
+    d: "Lost the thread. Mess, time blindness, no routine, no idea what matters.",
+    q: "The thread’s gone. Let’s find one end of it." },
+  { id: "discouraged", name: "Discouraged", c: "var(--blue)",
+    d: "What’s the point. Rejection, shame, resentment, or the tank is empty.",
+    q: "Something’s knocked you down." }
+];
+
+const UN_LIB = {
+  stuck: [
+    { t: "Name the first physical action",
+      do: "Not “write the profile.” The first movement your body makes: open the laptop lid. Click into the document. Type the filename. That is the entire task right now.",
+      why: "Your brain doesn’t resist movements, it resists projects. A project has no visible entry point; a movement has exactly one." },
+    { t: "Write the worst possible version",
+      do: "Produce a deliberately terrible draft. Leave gaps like SOMETHING ABOUT MY EXPERIENCE HERE. Misspell things. You are not permitted to make it good yet.",
+      why: "Perfectionism is a starting problem wearing a quality problem’s clothes. The blank page is the obstacle, and a bad draft removes it in ninety seconds." },
+    { t: "Shrink it until it sounds stupid",
+      do: "Halve the task. Then halve it again. Keep going until doing it feels faintly ridiculous. “Vacuum the house” becomes “vacuum one room.” Do that version.",
+      why: "If it still feels heavy, it’s still too big. Stupid-small isn’t a compromise — it’s the correct size for a brain that’s already refusing." },
+    { t: "Make it an if-then",
+      do: "Write one sentence and say it aloud: “When I [finish this coffee / sit down at 9], I will [exact action] at [exact place].” Then leave it alone.",
+      why: "Implementation intentions hand the decision to a trigger. Starting then costs nothing, because you already spent the decision." },
+    { t: "Flip a coin, then check your gut",
+      do: "Stuck between options? Assign them to heads and tails, flip, and watch your own reaction. Relief or disappointment. Go with the reaction, not the coin.",
+      why: "Most indecision is a preference you haven’t given yourself permission to have. The coin’s only job is to surface it." },
+    { t: "Change the room",
+      do: "Pick the task up and physically move — kitchen table, library, a café, the floor. Take the task and nothing else.",
+      why: "The chair you’ve been avoiding it in has built an association with not-doing. A new room has no history with this task yet." },
+    { t: "Talk it before you write it",
+      do: "Voice-note yourself explaining the thing to a friend, out loud, badly. Then transcribe the useful sentences.",
+      why: "Speaking bypasses the editor that’s blocking the writing. You’re rarely blocked on knowing — you’re blocked on composing." }
+  ],
+  overwhelmed: [
+    { t: "Empty your head first, sort later",
+      do: "Three minutes. Every open loop — work, home, money, the thing you’ve been ignoring for weeks. Straight into the capture box, one line each. No order, no categories.",
+      why: "A chunk of overwhelm is the metabolic cost of holding items in working memory. Externalising them frees the capacity you need to think about them." },
+    { t: "Today / Not today / Never",
+      do: "Three piles, no others. Be unreasonable with the third — aim to kill a quarter outright. Most of what’s crushing you isn’t actually yours.",
+      why: "Prioritising fails when every item stays alive. Deletion is the only operation that reduces load rather than reshuffling it." },
+    { t: "Six long exhales before anything",
+      do: "In for four, out for eight. Six rounds. Touch nothing until you’re done.",
+      why: "You cannot prioritise from a threat state. The long exhale is the part that actually down-regulates — a plan made mid-panic is just a panic with numbering." },
+    { t: "Write the real deadline next to each",
+      do: "For every item, the actual date something actually goes wrong. Not when it feels due. Most will land further out than your gut insists.",
+      why: "Undifferentiated urgency makes twelve things all feel due today. Dates restore the hierarchy without you doing a minute of the work." },
+    { t: "Find the bottleneck, not the loudest",
+      do: "Ignore urgency for a moment. Which single item has other items queued behind it? Do that one.",
+      why: "Clearing a bottleneck shrinks the whole list. Clearing an urgent-but-isolated task shrinks it by one and feels identical while you’re doing it." },
+    { t: "Three focus tasks, line under them",
+      do: "You already have a hard cap of three. Use it properly — star three, and refuse to look below the line until they’re done or the day ends.",
+      why: "An open list can never be finished, so it never delivers the completion signal you’re working for. A closed list can end. That’s the whole trick." },
+    { t: "Cancel one thing, today, out loud",
+      do: "Choose a commitment and actually send the message withdrawing from it. Now, while you’re clear-eyed about the cost of keeping it.",
+      why: "Over-commitment doesn’t resolve by working harder — that’s what got you here. One honest message buys back more capacity than an entire evening of effort." }
+  ],
+  unmotivated: [
+    { t: "Get a body double",
+      do: "Work alongside someone — same room, or a silent video call where you both just work. They don’t help. They don’t check. They exist while you do it.",
+      why: "Another person’s presence supplies the external structure your brain isn’t generating internally. It’s among the most reliably effective ADHD strategies there is, and it feels absurd until it works." },
+    { t: "Motivation arrives after, not before",
+      do: "Stop waiting to feel like it. Start badly, on purpose, and watch for the shift around minute three. Set the clock below so you can prove it to yourself.",
+      why: "Action generates motivation. Waiting for motivation before acting has the causation backwards, which is why the wait never ends." },
+    { t: "Bundle it with something good",
+      do: "The proper coffee, the specific album, the café with the good chair — available only while doing this task. Not before, not after.",
+      why: "Temptation bundling attaches an immediate reward to a task whose real payoff is too distant to move you. Distant payoffs don’t motivate ADHD brains. Present ones do." },
+    { t: "Tell one person a time",
+      do: "Message someone now: “Doing this by 4pm, I’ll tell you when it’s done.” Then tell them when it’s done.",
+      why: "A witness converts a private intention into a social one, and social stakes land far harder than abstract future consequences." },
+    { t: "Race the clock",
+      do: "Twelve minutes. Try to beat it. Make it a genuine game with a losing condition and a slightly unreasonable target.",
+      why: "Urgency and novelty are two of the few levers that reliably raise ADHD motivation. If the task won’t supply them, manufacture them." },
+    { t: "Make doing it easier than not doing it",
+      do: "Put the thing physically in your way. Documents open on screen before bed. The form on the chair you sit in. The vacuum already out in the hallway.",
+      why: "Friction decides most of these outcomes, not willpower. Move the friction to the side of not-doing and you stop needing to win the argument." },
+    { t: "Do the boring part while moving",
+      do: "Stand up. Pace the hallway. Take a walk and dictate it. Anything that stops you being still while you think.",
+      why: "Low arousal — not laziness — is what “unmotivated” usually is, and movement raises arousal within about ninety seconds." }
+  ],
+  disorganized: [
+    { t: "Make time visible",
+      do: "Put a physical countdown timer or an analogue clock in the room, running, where you can see it. Not your phone. The clock below works too.",
+      why: "Time blindness is a perception problem, not a discipline problem. A visible countdown supplies the sense of duration your brain doesn’t generate on its own." },
+    { t: "Guess, then measure",
+      do: "Before you start: write how long you think this will take. Afterwards: write how long it actually took. Capture both into the inbox.",
+      why: "You can’t plan realistically until you know the size and direction of your own estimation error. Two weeks of this beats any planning app you’ll ever download." },
+    { t: "Five things, one home each",
+      do: "Name the five objects you lose most often. Give each exactly one location. Change nothing else about anything today.",
+      why: "Organisation systems fail because they’re comprehensive. Five objects with fixed homes will still be working in a month, which no complete system ever is." },
+    { t: "Twenty-minute reset, hard stop",
+      do: "One surface. Timer on. Stop when it goes off regardless of how it looks. Walk away mid-pile if that’s where you are.",
+      why: "Open-ended tidying triggers exactly the same avoidance as any unbounded task. The forced stop is what makes it survivable enough to repeat." },
+    { t: "Build a launchpad",
+      do: "One tray or hook by the door that everything leaving the house passes through. Keys, wallet, card, bag, headphones. Nothing lives anywhere else.",
+      why: "It replaces remembering — which you’re bad at and always will be — with a single physical checkpoint, which you’re fine at." },
+    { t: "Let the check-in do the sorting",
+      do: "Don’t reorganise now. Dump everything loose into the capture box and leave it for the next check-in, which exists precisely for this.",
+      why: "Sorting while dysregulated produces a system you’ll abandon. Capture is frictionless by design so that clarifying can happen when you’ve got the bandwidth." },
+    { t: "If it isn’t written down it doesn’t exist",
+      do: "Hard rule for two weeks. Everything into the inbox. No exceptions — especially not for the ones you’re sure you’ll remember.",
+      why: "The items you trust yourself to remember are precisely the ones that get dropped, because you didn’t give them the protection you gave the others." }
+  ],
+  discouraged: [
+    { t: "Write the done list",
+      do: "Ten minutes listing what you have done this week. Include the small, the boring, the invisible — the email you dreaded, the form, the call you made anyway.",
+      why: "ADHD memory is biased hard toward the unfinished. The sense of having achieved nothing is a retrieval artefact, not an accurate account of your week." },
+    { t: "Rejection is a sample size problem",
+      do: "Write the number of attempts you’ve made — applications, pitches, submissions, asks. Any single no is noise until that number is large. Treat it as one data point, and get the set bigger.",
+      why: "Reading individual outcomes as verdicts on your worth is both statistically wrong and the most efficient route to stopping altogether." },
+    { t: "Say it as you’d say it to a friend",
+      do: "Write down the sentence you’re currently saying about yourself. Then write what you’d say to someone you liked in exactly this position. Use the second one.",
+      why: "Self-criticism reliably reduces task initiation. Shame is not fuel and never has been — it’s a brake you’re pressing while wondering why you can’t move." },
+    { t: "Lower the rep, don’t quit the set",
+      do: "Don’t abandon it. Do a deliberately tiny version today: one paragraph, one message, one room. Then stop, having shown up.",
+      why: "Today’s goal is keeping the streak of showing up alive, not output. Momentum is the asset, and it’s much cheaper to maintain than to rebuild." },
+    { t: "Separate what happened from what it means",
+      do: "Write the event in one factual sentence with no adjectives about you. “They went with another candidate.” Stop there. Don’t write the second sentence.",
+      why: "Most discouragement lives in the interpretation layer rather than the event. Strip the layer and what’s left is usually survivable." },
+    { t: "Missed days cost nothing — that’s the rule",
+      do: "If the gap is what’s bothering you, reread the restart rule. There is no debt to repay and no backfilling to do. Pick one thing and start a new run.",
+      why: "Guilt about a gap is the single most common reason systems get abandoned. This one is built so a gap costs you exactly nothing." },
+    { t: "Ask what you’d need to stop guiltlessly",
+      do: "Sometimes the honest answer is rest, not strategy. Name what would let you stop cleanly, take it deliberately, and set an end time.",
+      why: "Unplanned collapse costs the same hours as a decided break and leaves guilt on top. Same time, entirely different aftermath." }
+  ]
+};
+
+let unCtx = { task: "", taskId: null, st: null, idx: 0, seen: {} };
+let unTimerId = null, unLeft = 0;
+
+const ovEl = () => document.getElementById("unstickOv");
+const ovBody = () => document.getElementById("ovBody");
+
+function unOpen(task, taskId) {
+  unCtx = { task: task || "", taskId: taskId || null, st: null, idx: 0, seen: unCtx.seen || {} };
+  unStopT();
+  document.getElementById("ovStage").textContent = "Unstick";
+  ovEl().classList.remove("hidden");
+  unRenderStates();
+}
+
+function unClose() {
+  unStopT();
+  ovEl().classList.add("hidden");
+  ovBody().innerHTML = "";
+}
+
+function unRenderStates() {
+  const hist = state.unstick.filter(u => unCtx.taskId && u.taskId === unCtx.taskId);
+  const win = hist.filter(u => u.worked).slice(-1)[0];
+  const html =
+    (unCtx.task
+      ? '<div class="ov-task">' + esc(unCtx.task) + "</div>"
+      : '<div class="ov-task">Something else</div>') +
+    '<div class="ov-q">What’s actually in the way? Pick the feeling. The feeling is the obstacle.</div>' +
+    '<div class="st-list">' +
+    UN_STATES.map((s, i) =>
+      '<button class="st" data-i="' + i + '" style="--c:' + s.c + '">' +
+        '<span class="dot"></span><span><span class="n">' + s.name + "</span>" +
+        '<span class="d">' + s.d + "</span></span></button>"
+    ).join("") +
+    "</div>" +
+    (win
+      ? '<div class="ov-hist">Last time this one moved: <b>' + esc(win.intervention) + "</b> (" + win.state + ")</div>"
+      : hist.length
+        ? '<div class="ov-hist">' + hist.length + " previous attempt" + (hist.length > 1 ? "s" : "") + " on this — nothing logged as working yet.</div>"
+        : "");
+  ovBody().innerHTML = html;
+  ovBody().querySelectorAll(".st").forEach(b => {
+    b.onclick = () => { unCtx.st = UN_STATES[+b.dataset.i]; unServe(); };
+  });
+}
+
+function unServe() {
+  const s = unCtx.st, lib = UN_LIB[s.id];
+  if (!unCtx.seen[s.id] || unCtx.seen[s.id].length >= lib.length) unCtx.seen[s.id] = [];
+  const pool = lib.map((_, i) => i).filter(i => unCtx.seen[s.id].indexOf(i) < 0);
+  unCtx.idx = pool[Math.floor(Math.random() * pool.length)];
+  unCtx.seen[s.id].push(unCtx.idx);
+  const iv = lib[unCtx.idx];
+
+  document.getElementById("ovStage").textContent = "Unstick: " + s.name;
+  ovBody().innerHTML =
+    '<div style="--c:' + s.c + '">' +
+      (unCtx.task ? '<div class="ov-q" style="margin-bottom:12px">' + esc(unCtx.task) + "</div>" : "") +
+      '<div class="iv-t">' + iv.t + "</div>" +
+      '<div class="iv-do">' + iv.do + "</div>" +
+      '<div class="iv-why"><span>why this works</span>' + iv.why + "</div>" +
+      '<div class="ov-timer">' +
+        '<div class="ov-clock" id="ovClock">00:00</div>' +
+        '<div class="ov-tlabel" id="ovTlabel">start a clock — the stop time is the point</div>' +
+        '<div class="ov-presets">' +
+          '<button data-s="120">2 min</button><button data-s="300">5 min</button>' +
+          '<button data-s="720">12 min</button><button data-s="1500">25 min</button>' +
+          '<button data-s="0">stop</button>' +
+        "</div>" +
+      "</div>" +
+      '<div class="ov-acts">' +
+        '<button class="go" data-a="y">That worked</button>' +
+        '<button data-a="n">Didn’t land — another</button>' +
+        '<button data-a="b">Back</button>' +
+      "</div>" +
+    "</div>";
+
+  ovBody().querySelectorAll(".ov-presets button").forEach(b => {
+    b.onclick = () => { const v = +b.dataset.s; v ? unStartT(v) : unStopT(); };
+  });
+  ovBody().querySelector('[data-a="y"]').onclick = () => unMark(true);
+  ovBody().querySelector('[data-a="n"]').onclick = () => unMark(false);
+  ovBody().querySelector('[data-a="b"]').onclick = () => {
+    unStopT();
+    document.getElementById("ovStage").textContent = "Unstick";
+    unRenderStates();
+  };
+}
+
+async function unMark(worked) {
+  state.unstick.push({
+    id: uid("u"),
+    task: unCtx.task || null,
+    taskId: unCtx.taskId,
+    state: unCtx.st.id,
+    intervention: UN_LIB[unCtx.st.id][unCtx.idx].t,
+    worked: worked,
+    created: new Date().toISOString()
+  });
+  await writeFile("unstick");
+  if (worked) {
+    unClose();
+    flashStatus('<span class="warn">Logged — go do it.</span>');
+  } else {
+    unServe();
+  }
+}
+
+function unFmt(s) {
+  return String(Math.floor(s / 60)).padStart(2, "0") + ":" + String(s % 60).padStart(2, "0");
+}
+function unStartT(sec) {
+  unStopT();
+  unLeft = sec;
+  const c = document.getElementById("ovClock");
+  if (!c) return;
+  c.className = "ov-clock is-run";
+  c.textContent = unFmt(unLeft);
+  document.getElementById("ovTlabel").textContent = "running — you may stop when it ends";
+  unTimerId = setInterval(() => {
+    unLeft--;
+    const cc = document.getElementById("ovClock");
+    if (!cc) return unStopT();
+    cc.textContent = unFmt(Math.max(0, unLeft));
+    if (unLeft <= 0) {
+      clearInterval(unTimerId); unTimerId = null;
+      cc.className = "ov-clock is-done";
+      cc.textContent = "done";
+      document.getElementById("ovTlabel").textContent = "that’s the deal — stopping now is allowed";
+    }
+  }, 1000);
+}
+function unStopT() {
+  if (unTimerId) { clearInterval(unTimerId); unTimerId = null; }
+  const c = document.getElementById("ovClock");
+  if (c) {
+    c.className = "ov-clock";
+    c.textContent = "00:00";
+    document.getElementById("ovTlabel").textContent = "start a clock — the stop time is the point";
+  }
+}
+
+/* ================= connect flow ================= */
+async function useHandle(handle) {
+  rootHandle = handle;
+  dataHandle = await handle.getDirectoryHandle("data", { create: true });
+  document.getElementById("connectView").classList.add("hidden");
+  document.getElementById("appView").classList.remove("hidden");
+  await loadAll();
+  document.getElementById("captureInput").focus();
+}
+let pendingRoot = null; // saved folder handle waiting for the one click Chrome needs
+async function connect() {
+  try {
+    // Re-granting the STORED handle (not re-picking) is what makes Chrome offer
+    // "Allow on every visit" — after that, this screen never shows again.
+    if (pendingRoot) {
+      if (await pendingRoot.requestPermission({ mode: "readwrite" }) === "granted") {
+        const h = pendingRoot; pendingRoot = null;
+        await useHandle(h);
+        return;
+      }
+      pendingRoot = null; // declined — fall through to a fresh pick
+    }
+    const handle = await window.showDirectoryPicker({ id: "lifeos", mode: "readwrite" });
+    await idbSet("root", handle);
+    await useHandle(handle);
+  } catch (e) {
+    if (e.name !== "AbortError") console.error("[LifeOS] connect failed:", e);
+  }
+}
+async function init() {
+  if (!window.showDirectoryPicker) {
+    document.getElementById("connectView").classList.remove("hidden");
+    document.getElementById("connectNote").textContent = "This browser doesn\u2019t support the File System Access API — open lifeos.html in Chrome or Edge.";
+    document.getElementById("connectBtn").classList.add("hidden");
+    return;
+  }
+  const saved = await idbGet("root").catch(() => null);
+  let granted = false;
+  if (saved) {
+    try { granted = await saved.queryPermission({ mode: "readwrite" }) === "granted"; } catch (e) { /* stale handle */ }
+  }
+  if (granted) {
+    await useHandle(saved);
+  } else {
+    if (saved) {
+      // One click re-grants; Chrome's prompt has "Allow on every visit" — pick it once.
+      pendingRoot = saved;
+      document.querySelector("#connectView h1").textContent = "Reopen LifeOS";
+      document.querySelector("#connectView p").innerHTML =
+        "Chrome needs one click to reopen the folder. In its prompt choose <b>Allow on every visit</b> and this screen is gone for good.";
+      document.getElementById("connectBtn").textContent = "Open LifeOS";
+    }
+    document.getElementById("connectView").classList.remove("hidden");
+  }
+}
+
+/* ================= wiring ================= */
+document.getElementById("connectBtn").onclick = connect;
+document.getElementById("reloadBtn").onclick = loadAll;
+document.getElementById("unstickBtn").onclick = () => unOpen("", null);
+document.getElementById("ovClose").onclick = unClose;
+ovEl().addEventListener("click", e => { if (e.target === ovEl()) unClose(); });
+document.getElementById("tmClose").onclick = tmClose;
+tmEl().addEventListener("click", e => { if (e.target === tmEl()) tmClose(); });
+document.addEventListener("keydown", e => {
+  if (e.key !== "Escape") return;
+  if (!ovEl().classList.contains("hidden")) unClose();
+  if (!tmEl().classList.contains("hidden")) tmClose();
+});
+const capInput = document.getElementById("captureInput");
+capInput.addEventListener("keydown", async e => {
+  if (e.key === "Enter" && capInput.value.trim()) {
+    const wrap = document.getElementById("captureWrap");
+    await capture(capInput.value.trim());
+    capInput.value = "";
+    wrap.classList.add("saved");
+    setTimeout(() => wrap.classList.remove("saved"), 600);
+  }
+});
+// pick up edits made outside the app (an assistant at check-in, a text editor, git pull)
+document.addEventListener("visibilitychange", () => {
+  if (!document.hidden && dataHandle) loadAll();
+});
+
+init();
+</script>
+</body>
+</html>

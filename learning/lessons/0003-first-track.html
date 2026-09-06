@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Your first real track — LifeOS learning</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/lesson.css"></head>
+<body><div class="page">
+<div class="eyebrow">Getting started · card 3 of 3 · 25 min</div>
+<h1>Define your first real learning track</h1>
+<div class="payoff"><b>Payoff:</b> tomorrow morning the card waiting for you is about something you actually want to learn, built from a source your assistant fetched and checked, pointed at a thing you will be able to hold up at the end. This is the moment the template becomes yours.</div>
+
+<div id="t"></div>
+
+<h2><span class="n">01</span>What a good track looks like</h2>
+<p>A track is not a subject. It is a route to an <b>artifact</b>: something that exists afterwards and that you could show someone.</p>
+<table><tr><th>Weak track</th><th>Strong track</th><th>Why</th></tr>
+<tr><td>"Learn Python"</td><td>"A script that renames my photo library by date" (5 sessions)</td><td>You can run it. You know when you are done.</td></tr>
+<tr><td>"Get better at cooking"</td><td>"Five weeknight dinners I can make without a recipe" (5 sessions)</td><td>Countable, tastable, done.</td></tr>
+<tr><td>"Understand AI"</td><td>"A one-page point of view I could defend in a meeting" (4 sessions)</td><td>A document exists. Opinions are checkable.</td></tr></table>
+<div class="why"><span>why artifacts</span>The dots under the card only mean something if they count toward a thing. "3 of 5 sessions in Python" is a number. "3 of 5 toward a working script" is a promise. The second one gets you out of bed.</div>
+
+<h2><span class="n">02</span>Write the mission</h2>
+<div class="step"><div class="lab">with your assistant, 10 min</div>Open <code>learning/MISSION.md</code>. It has a template. Answer the one hard question: <b>what changes in your life or work when you have this?</b> If the honest answer is "I would just like to know it", push once more. There is usually a concrete outcome underneath.</div>
+<p>Then agree one track: name, artifact, number of sessions (four to six is right). Add it to <code>tracks</code> in <code>data/learning.json</code>. Your assistant knows the schema.</p>
+
+<h2><span class="n">03</span>Constraints that make cards land</h2>
+<p>Every card the curation builds obeys these, and you should hold it to them:</p>
+<table><tr><th>Constraint</th><th>Why</th></tr>
+<tr><td>Twenty to thirty minutes</td><td>Longer than that and the card gets swapped, not done.</td></tr>
+<tr><td>Payoff in the first line</td><td>If the reason to do it is at the bottom, nobody reaches the bottom.</td></tr>
+<tr><td>One tangible win per card</td><td>Something exists or works at the end. Reading alone does not count.</td></tr>
+<tr><td>A primary source, fetched and verified</td><td>The assistant reads the actual page and links it. Never recalled from memory.</td></tr>
+<tr><td>A quiz or a check</td><td>A feedback loop, however small, is what makes it stick.</td></tr></table>
+
+<h2><span class="n">04</span>Deal the first hand</h2>
+<div class="task"><p>Run the curate ritual (<code>/curate</code> in Claude Code, or "run the weekly curation from CLAUDE.md" elsewhere). It will propose five to seven cards plus two wildcards. Strike what you do not want. It builds lessons for the rest and puts them in the queue.</p>
+<div class="hint">When it is done, press Done on this card, write your takeaway, and retire the Getting started track by setting its status to "done" in learning.json. Tomorrow's card is yours.</div></div>
+
+<h2><span class="n">05</span>Check it stuck</h2>
+<div id="q1"></div><div id="q2"></div>
+
+<div class="win"><b>The win:</b> a mission exists, a track with a real artifact exists, and a hand of cards is queued. The template is now your system.</div>
+
+<div class="foot">This lesson is part of the template. Anything unclear? Ask your assistant in this folder.</div>
+</div>
+<script src="../assets/quiz.js"></script>
+<script>
+timer(document.getElementById("t"), 25);
+quiz(document.getElementById("q1"), { q: "Which of these is a track artifact rather than a subject?",
+  opts: ["Understanding statistics properly", "A spreadsheet that forecasts my budget", "Getting more confident with numbers"], answer: 1,
+  why: "It exists afterwards and you can open it. The other two have no finish line." });
+quiz(document.getElementById("q2"), { q: "The assistant proposes a 45-minute card with the payoff explained at the end. What do you do?",
+  opts: ["Accept it, longer means deeper", "Strike it or ask for it shrunk", "Split it into two cards yourself"], answer: 1,
+  why: "Cards are 20 to 30 minutes with the payoff first. Rescoping is the assistant's job at curation; you veto." });
+</script></body></html>

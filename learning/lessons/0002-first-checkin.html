@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Your first check-in — LifeOS learning</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/lesson.css"></head>
+<body><div class="page">
+<div class="eyebrow">Getting started · card 2 of 3 · 20 min</div>
+<h1>Wire in an assistant and run your first check-in</h1>
+<div class="payoff"><b>Payoff:</b> by the end, an AI assistant has read your inbox, proposed what each item is, and written the result into your task list. Inbox zero, three tasks starred, one review note on disk. You never do this by hand again.</div>
+
+<div id="t"></div>
+
+<h2><span class="n">01</span>Pick your assistant</h2>
+<p>Anything that can read and write files in a folder works. Three routes, from least to most setup:</p>
+<table><tr><th>Route</th><th>Setup</th><th>What you get</th></tr>
+<tr><td><b>Claude Code</b></td><td>Install it, open a terminal in this folder, type <code>claude</code>.</td><td>The four rituals are already installed as slash commands under <code>.claude/skills/</code>. Type <code>/checkin</code>.</td></tr>
+<tr><td><b>Another coding agent</b> (Codex, Cursor, Copilot, Aider, and so on)</td><td>Open the folder. Most of them read <code>AGENTS.md</code> automatically.</td><td>Say "run the daily check-in as described in CLAUDE.md". The ritual steps are in the skill files; the agent can read them.</td></tr>
+<tr><td><b>A chat model with no file access</b></td><td>Paste <code>CLAUDE.md</code> and <code>data/inbox.json</code> into the chat.</td><td>Proposals only. You apply them in the app. Slower, still useful.</td></tr></table>
+<div class="why"><span>the contract</span>Whatever you use, the rules are the same and they live in <code>CLAUDE.md</code>: preserve the JSON schemas, two-space indent, never backfill habits, never nag. Read <code>docs/AI-INTEGRATION.md</code> if you want the full picture, including a local model on your own machine.</div>
+
+<h2><span class="n">02</span>Run it</h2>
+<div class="step"><div class="lab">what the check-in does, in order</div>
+Reads the data files. Opens with a two-line status. Asks once whether anything is uncaptured. Proposes a classification for each inbox item and confirms the batch in one question. Proposes today's three focus tasks. Asks about habits. Writes <code>reviews/YYYY-MM-DD.md</code>. Commits. Closes with the day in one line.</div>
+<p>Five to ten minutes, hard cap. If it is taking longer, the assistant is asking too many questions; tell it to propose and batch.</p>
+
+<h2><span class="n">03</span>Watch the app pick it up</h2>
+<div class="task"><p>Switch back to the app tab. It reloads when the tab regains focus. Your inbox should be empty, up to three tasks should be starred, and the move card should show the first one.</p>
+<div class="hint">If it did not refresh, press the reload button in the header. If the assistant broke a file, the app logs the file name in the browser console and shows that section empty. Git has the previous version.</div></div>
+
+<h2><span class="n">04</span>The one habit worth adding first</h2>
+<p>The design was tuned around one habit: a daily learning block. Pressing Done on a learning card ticks any habit whose name contains "learn" automatically, so the habit costs nothing extra. Ask the assistant to add it, or leave habits empty for now. Five is the cap. Start with one.</p>
+
+<h2><span class="n">05</span>Check it stuck</h2>
+<div id="q1"></div><div id="q2"></div>
+
+<div class="win"><b>The win:</b> a check-in has run, the inbox is clear, and the assistant has proven it can edit your data without breaking it. Card 3 turns this starter track into a real one.</div>
+
+<div class="foot">This lesson is part of the template. Anything unclear? Ask your assistant in this folder.</div>
+</div>
+<script src="../assets/quiz.js"></script>
+<script>
+timer(document.getElementById("t"), 20);
+quiz(document.getElementById("q1"), { q: "The check-in is running twenty minutes and still asking questions one at a time. What is wrong?",
+  opts: ["Nothing, thoroughness is the point", "It should propose and batch-confirm", "Your inbox has too many items"], answer: 1,
+  why: "The ritual is capped at ten minutes. The assistant proposes a classification for every item and confirms the whole batch in one question." });
+quiz(document.getElementById("q2"), { q: "You want a weekly habit, say 'call a friend every Sunday'. Where does it go?",
+  opts: ["habits.json, ticked on Sundays", "tasks.json as a recurring task", "goals.json as a next action"], answer: 1,
+  why: "Habits are daily only. Streaks are consecutive dates, so a weekly habit reads as broken six days out of seven. Weekly work goes in as a task." });
+</script></body></html>
